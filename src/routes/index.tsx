@@ -1,4 +1,3 @@
-
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
@@ -18,6 +17,10 @@ import {
   LogIn,
   Sparkles,
   UserCheck,
+  ChevronDown,
+  Moon,
+  Sun,
+  Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -166,12 +169,20 @@ const UNIT_DATA: Record<
   },
 };
 
+const THEMES: { id: ThemeType; label: string; color: string }[] = [
+  { id: "candy", label: "Candy Pastel", color: "bg-[#f29f9f]" },
+  { id: "dark", label: "Dark Velvet", color: "bg-[#453a5e]" },
+  { id: "sapphire", label: "Azul Safira", color: "bg-[#3b82f6]" },
+  { id: "emerald", label: "Esmeralda", color: "bg-[#10b981]" },
+];
+
 function Index() {
   // App navigation state
   const [activeTab, setActiveTab] = useState<AppTab>("calc");
   const [scientificMode, setScientificMode] = useState<boolean>(false);
   const [theme, setTheme] = useState<ThemeType>("candy");
   const [showThemeMenu, setShowThemeMenu] = useState<boolean>(false);
+  const themeDropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -212,6 +223,22 @@ function Index() {
       }
     }
   }, [theme]);
+
+  // Click outside to close theme dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        themeDropdownRef.current &&
+        !themeDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowThemeMenu(false);
+      }
+    }
+    if (showThemeMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showThemeMenu]);
 
   // Load session & history from localStorage
   useEffect(() => {
@@ -612,214 +639,182 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative transition-colors duration-300">
-      {/* Tactile Modern Navbar */}
-      <header className="w-full max-w-4xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6 z-20 calc-fade-up">
-        <nav className="w-full rounded-3xl bg-sand/90 backdrop-blur-md ring-1 ring-ink/5 px-3 sm:px-5 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_10px_35px_rgb(0,0,0,0.05)]">
-          {/* Logo Brand */}
-          <div className="flex items-center justify-between w-full sm:w-auto">
+    <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative transition-colors duration-300 antialiased selection:bg-rose/20">
+      {/* PREMIUM MODERN REDESIGNED NAVBAR */}
+      <header className="sticky top-0 z-40 w-full pt-3 sm:pt-5 px-3 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <nav className="w-full rounded-2xl sm:rounded-3xl bg-sand/85 dark:bg-sand/75 backdrop-blur-xl border border-ink/8 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
+            
+            {/* BRAND / LOGO */}
             <div
               onClick={() => setActiveTab("calc")}
-              className="flex items-center gap-2.5 cursor-pointer"
+              className="flex items-center gap-2.5 cursor-pointer group select-none shrink-0"
             >
-              <div className="size-9 rounded-2xl bg-rose grid place-items-center text-white text-base font-[family-name:var(--font-fredoka)] font-bold ring-1 ring-white/40 shadow-sm">
+              <div className="size-9 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-lg font-[family-name:var(--font-fredoka)] font-bold shadow-md shadow-rose/25 ring-2 ring-white/50 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
                 +
               </div>
-              <div>
+              <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink leading-none">
+                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-base sm:text-lg text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
                     Calculadora
                   </span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider bg-rose/20 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
+                  <span className="text-[10px] uppercase font-extrabold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none ring-1 ring-rose/20">
                     Plus
                   </span>
                 </div>
-                <p className="text-[10px] font-medium text-ink-soft leading-none mt-1">
-                  Rápida & Inteligente
-                </p>
+                <span className="hidden sm:inline-block text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
+                  Rápida & Científica
+                </span>
               </div>
             </div>
 
-            {/* Mobile Actions */}
-            <div className="flex sm:hidden items-center gap-1.5">
-              <Link
-                to="/login"
-                className="px-2.5 py-1 rounded-xl bg-rose text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer shadow-sm"
-              >
-                {currentUser ? <UserCheck className="size-3" /> : <LogIn className="size-3" />}
-                <span>{currentUser ? currentUser.name.split(" ")[0] : "Entrar"}</span>
-              </Link>
-
+            {/* CENTER SEGMENTED NAVIGATION TABS */}
+            <div className="flex items-center bg-display/80 backdrop-blur-sm p-1 rounded-xl sm:rounded-2xl border border-ink/6 shadow-inner">
               <button
-                onClick={() => setShowThemeMenu(!showThemeMenu)}
-                className="size-8 rounded-xl bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink cursor-pointer"
-                title="Trocar tema"
+                onClick={() => setActiveTab("calc")}
+                className={[
+                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  activeTab === "calc"
+                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                ].join(" ")}
+                title="Calculadora Padrão e Científica"
               >
-                <Palette className="size-4 text-rose" />
+                <Calculator className="size-3.5 sm:size-4 shrink-0" />
+                <span className="hidden xs:inline">Calculadora</span>
+                <span className="xs:hidden">Calc</span>
               </button>
 
               <button
-                onClick={() => setShowHistoryDrawer(true)}
-                className="size-8 rounded-xl bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink cursor-pointer relative"
-                title="Histórico de cálculos"
+                onClick={() => setActiveTab("currency")}
+                className={[
+                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  activeTab === "currency"
+                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                ].join(" ")}
+                title="Conversor de Moedas em Tempo Real"
               >
-                <History className="size-4 text-rose" />
+                <Coins className="size-3.5 sm:size-4 shrink-0" />
+                <span>Moedas</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("units")}
+                className={[
+                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  activeTab === "units"
+                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                ].join(" ")}
+                title="Conversor de Unidades e Medidas"
+              >
+                <Scale className="size-3.5 sm:size-4 shrink-0" />
+                <span className="hidden sm:inline">Unidades</span>
+                <span className="sm:hidden">Medidas</span>
+              </button>
+            </div>
+
+            {/* RIGHT SIDE TOOLS & ACTIONS */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              
+              {/* History Button */}
+              <button
+                onClick={() => setShowHistoryDrawer(true)}
+                className="calc-key relative h-9 px-2 sm:px-3 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
+                title="Histórico de Cálculos"
+              >
+                <History className="size-4 text-rose-deep shrink-0" />
+                <span className="hidden md:inline">Histórico</span>
                 {calculationHistory.length > 0 && (
-                  <span className="absolute -top-1 -right-1 size-3.5 bg-rose text-white text-[9px] font-bold rounded-full grid place-items-center">
+                  <span className="size-4 bg-rose text-white text-[10px] font-bold rounded-full grid place-items-center">
                     {calculationHistory.length > 9 ? "9+" : calculationHistory.length}
                   </span>
                 )}
               </button>
-            </div>
-          </div>
-
-          {/* Navigation View Tabs (Includes prominent /login link) */}
-          <div className="flex items-center bg-display p-1 rounded-2xl ring-1 ring-ink/5 w-full sm:w-auto justify-center gap-1 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab("calc")}
-              className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                activeTab === "calc"
-                  ? "bg-rose text-white shadow-sm ring-1 ring-white/30"
-                  : "text-ink-soft hover:text-ink",
-              ].join(" ")}
-            >
-              <Calculator className="size-3.5" />
-              <span>Calculadora</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("currency")}
-              className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                activeTab === "currency"
-                  ? "bg-rose text-white shadow-sm ring-1 ring-white/30"
-                  : "text-ink-soft hover:text-ink",
-              ].join(" ")}
-            >
-              <Coins className="size-3.5" />
-              <span>Moedas</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("units")}
-              className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                activeTab === "units"
-                  ? "bg-rose text-white shadow-sm ring-1 ring-white/30"
-                  : "text-ink-soft hover:text-ink",
-              ].join(" ")}
-            >
-              <Scale className="size-3.5" />
-              <span>Unidades</span>
-            </button>
-
-            {/* TAB: LINK PARA ROTA DEDICADA /login */}
-            <Link
-              to="/login"
-              className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                currentUser
-                  ? "text-rose-deep font-bold bg-mint/30 ring-1 ring-mint/40"
-                  : "text-ink-soft hover:text-ink",
-              ].join(" ")}
-            >
-              {currentUser ? <UserCheck className="size-3.5" /> : <LogIn className="size-3.5" />}
-              <span>{currentUser ? currentUser.name.split(" ")[0] : "Login"}</span>
-            </Link>
-          </div>
-
-          {/* Quick Actions (Desktop) */}
-          <div className="hidden sm:flex items-center gap-2">
-            {/* Direct /login Link button */}
-            <Link
-              to="/login"
-              className={[
-                "calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                currentUser
-                  ? "bg-mint/40 ring-1 ring-mint text-ink hover:bg-mint/60"
-                  : "bg-rose text-white ring-1 ring-white/30 hover:bg-rose-deep shadow-sm",
-              ].join(" ")}
-              title={currentUser ? "Ver perfil" : "Entrar ou cadastrar"}
-            >
-              {currentUser ? <UserCheck className="size-3.5" /> : <LogIn className="size-3.5" />}
-              <span>{currentUser ? currentUser.name : "Entrar / Cadastro"}</span>
-            </Link>
-
-            {/* History Button */}
-            <button
-              onClick={() => setShowHistoryDrawer(true)}
-              className="calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-display ring-1 ring-ink/5 text-ink hover:bg-white text-xs font-semibold select-none cursor-pointer relative"
-              title="Ver histórico de cálculos"
-            >
-              <History className="size-3.5 text-rose-deep" />
-              <span>Histórico</span>
-              {calculationHistory.length > 0 && (
-                <span className="size-4 bg-rose text-white text-[9px] font-bold rounded-full grid place-items-center ml-0.5">
-                  {calculationHistory.length > 9 ? "9+" : calculationHistory.length}
-                </span>
-              )}
-            </button>
-
-            {/* Theme Picker Button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowThemeMenu(!showThemeMenu)}
-                className="calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-display ring-1 ring-ink/5 text-ink hover:bg-white text-xs font-semibold select-none cursor-pointer"
-                title="Mudar tema de cores"
-              >
-                <Palette className="size-3.5 text-rose-deep" />
-                <span className="capitalize">{theme}</span>
-              </button>
 
               {/* Theme Dropdown */}
-              {showThemeMenu && (
-                <div
-                  className="absolute right-0 mt-2 w-36 rounded-2xl bg-sand p-1.5 ring-1 ring-ink/10 shadow-xl z-50 animate-in fade-in zoom-in-95"
-                  onClick={() => setShowThemeMenu(false)}
+              <div className="relative" ref={themeDropdownRef}>
+                <button
+                  onClick={() => setShowThemeMenu((prev) => !prev)}
+                  className="calc-key h-9 px-2 sm:px-2.5 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
+                  title="Alterar Tema de Cores"
                 >
-                  <button
-                    onClick={() => setTheme("candy")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
-                  >
-                    <span>Candy (Pastel)</span>
-                    <span className="size-3 rounded-full bg-[#f29f9f]" />
-                  </button>
-                  <button
-                    onClick={() => setTheme("dark")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
-                  >
-                    <span>Dark Velvet</span>
-                    <span className="size-3 rounded-full bg-[#302b3d]" />
-                  </button>
-                  <button
-                    onClick={() => setTheme("sapphire")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
-                  >
-                    <span>Azul Safira</span>
-                    <span className="size-3 rounded-full bg-[#3b82f6]" />
-                  </button>
-                  <button
-                    onClick={() => setTheme("emerald")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
-                  >
-                    <span>Esmeralda Zen</span>
-                    <span className="size-3 rounded-full bg-[#10b981]" />
-                  </button>
-                </div>
-              )}
-            </div>
+                  <Palette className="size-4 text-rose-deep shrink-0" />
+                  <span className="hidden lg:inline capitalize">{theme}</span>
+                  <ChevronDown className="size-3 text-ink-soft hidden sm:inline" />
+                </button>
 
-            {/* Shortcuts button */}
-            <button
-              onClick={() => setShowShortcuts(true)}
-              className="calc-key p-2 rounded-xl bg-display ring-1 ring-ink/5 text-ink hover:bg-white text-xs font-semibold select-none cursor-pointer"
-              title="Atalhos do teclado"
-            >
-              <Keyboard className="size-3.5 text-rose-deep" />
-            </button>
-          </div>
-        </nav>
+                {showThemeMenu && (
+                  <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-sand/95 backdrop-blur-xl p-1.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top-right">
+                    <div className="px-2.5 py-1.5 text-[10px] uppercase font-bold tracking-wider text-ink-soft border-b border-ink/8 mb-1">
+                      Temas Visuais
+                    </div>
+                    {THEMES.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          setTheme(t.id);
+                          setShowThemeMenu(false);
+                        }}
+                        className={[
+                          "w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium cursor-pointer transition-colors",
+                          theme === t.id
+                            ? "bg-rose/15 text-rose-deep font-semibold"
+                            : "text-ink hover:bg-display",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`size-3 rounded-full ${t.color} ring-1 ring-black/10 shadow-xs`} />
+                          <span>{t.label}</span>
+                        </div>
+                        {theme === t.id && <Check className="size-3.5 text-rose-deep" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Shortcuts Dialog Button (Desktop) */}
+              <button
+                onClick={() => setShowShortcuts(true)}
+                className="calc-key hidden sm:flex size-9 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 items-center justify-center text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
+                title="Atalhos do Teclado"
+              >
+                <Keyboard className="size-4 text-rose-deep" />
+              </button>
+
+              {/* User Account / Login CTA */}
+              <Link
+                to="/login"
+                className={[
+                  "calc-key h-9 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs",
+                  currentUser
+                    ? "bg-mint/40 text-ink border border-mint hover:bg-mint/60 font-bold"
+                    : "bg-gradient-to-r from-rose to-rose-deep text-white shadow-rose/25 ring-1 ring-white/30 hover:brightness-105",
+                ].join(" ")}
+                title={currentUser ? `Conectado como ${currentUser.name}` : "Acessar ou Criar Conta"}
+              >
+                {currentUser ? (
+                  <>
+                    <div className="size-5 rounded-full bg-rose text-white text-[10px] font-bold grid place-items-center">
+                      {currentUser.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="hidden sm:inline truncate max-w-[80px]">
+                      {currentUser.name.split(" ")[0]}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="size-3.5 shrink-0" />
+                    <span className="hidden sm:inline">Entrar</span>
+                  </>
+                )}
+              </Link>
+
+            </div>
+          </nav>
+        </div>
       </header>
 
       {/* Main Content Areas */}
@@ -1421,4 +1416,3 @@ function Index() {
     </div>
   );
 }
-  

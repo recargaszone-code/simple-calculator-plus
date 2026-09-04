@@ -370,9 +370,7 @@ function Index() {
 
       {/* Footnote */}
       <p className="calc-fade-up mt-6 text-sm font-medium text-ink-soft text-center">
-        Toque num botão ou use o teclado —{" "}
-        <span className="text-ink font-semibold">Enter</span> para calcular,{" "}
-        <span className="text-ink font-semibold">Esc</span> para limpar.
+        Maxwell Você é o Melhro
       </p>
     </div>
   );

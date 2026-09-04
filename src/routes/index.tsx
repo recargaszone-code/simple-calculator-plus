@@ -248,9 +248,8 @@ function Index() {
   const [showModeMenu, setShowModeMenu] = useState<boolean>(false);
   const [scientificMode, setScientificMode] = useState<boolean>(false);
   const [theme, setTheme] = useState<ThemeType>("candy");
-  const [showThemeMenu, setShowThemeMenu] = useState<boolean>(false);
+  const [showThemesInSelector, setShowThemesInSelector] = useState<boolean>(false);
   const modeDropdownRef = useRef<HTMLDivElement | null>(null);
-  const themeDropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -350,22 +349,19 @@ function Index() {
     }
   }, [theme]);
 
-  // Click outside to close mode & theme dropdowns
+  // Click outside to close mode dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      if (themeDropdownRef.current && !themeDropdownRef.current.contains(target)) {
-        setShowThemeMenu(false);
-      }
       if (modeDropdownRef.current && !modeDropdownRef.current.contains(target)) {
         setShowModeMenu(false);
       }
     }
-    if (showThemeMenu || showModeMenu) {
+    if (showModeMenu) {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showThemeMenu, showModeMenu]);
+  }, [showModeMenu]);
 
   // Load session & history & memory from localStorage
   useEffect(() => {
@@ -1188,7 +1184,7 @@ function Index() {
 
               {/* Categorized Dropdown Menu */}
               {showModeMenu && (
-                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 sm:w-80 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top">
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 sm:w-84 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top max-h-[85vh] overflow-y-auto custom-scrollbar">
                   
                   {/* Cálculos Group */}
                   <div className="px-2 py-1">
@@ -1242,7 +1238,7 @@ function Index() {
                       Conversores
                     </span>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 mb-2">
                     {MODE_ITEMS.filter((item) => item.category === "Conversores").map((item) => {
                       const Icon = item.icon;
                       const isSelected = activeTab === item.id;
@@ -1282,88 +1278,109 @@ function Index() {
                     })}
                   </div>
 
+                  {/* Histórico & Personalização Group */}
+                  <div className="px-2 py-1 border-t border-ink/8 pt-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft/80">
+                      Recursos & Visual
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {/* Histórico Item */}
+                    <button
+                      onClick={() => {
+                        setShowModeMenu(false);
+                        setShowHistoryDrawer(true);
+                      }}
+                      className="w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all border border-transparent text-ink hover:bg-display/90 hover:border-ink/5 group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="size-7 rounded-xl bg-display text-rose-deep group-hover:bg-rose group-hover:text-white grid place-items-center shrink-0 transition-colors">
+                          <History className="size-3.5" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-semibold leading-tight">Histórico de Cálculos</p>
+                          <p className="text-[10px] text-ink-soft truncate font-normal leading-tight">
+                            Ver, exportar CSV/TXT e compartilhar
+                          </p>
+                        </div>
+                      </div>
+                      {calculationHistory.length > 0 ? (
+                        <span className="min-w-5 h-5 px-1.5 bg-rose text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs shrink-0 ml-2">
+                          {calculationHistory.length}
+                        </span>
+                      ) : (
+                        <ArrowRight className="size-3.5 text-ink-soft group-hover:text-rose-deep shrink-0 ml-2" />
+                      )}
+                    </button>
+
+                    {/* Tema Visual Item / Collapsible Picker */}
+                    <div className="rounded-xl border border-ink/5 bg-display/50 p-2">
+                      <button
+                        onClick={() => setShowThemesInSelector((prev) => !prev)}
+                        className="w-full flex items-center justify-between text-left cursor-pointer select-none"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="size-7 rounded-xl bg-display text-rose-deep grid place-items-center shrink-0">
+                            <Palette className="size-3.5" />
+                          </div>
+                          <div className="truncate">
+                            <p className="text-xs font-semibold leading-tight flex items-center gap-1.5">
+                              <span>Tema Visual</span>
+                              <span className="text-[9px] font-bold uppercase tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.2 rounded-md">
+                                {currentThemeObj.label}
+                              </span>
+                            </p>
+                            <p className="text-[10px] text-ink-soft truncate font-normal leading-tight">
+                              16 paletas e estilos de cores
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronDown
+                          className={[
+                            "size-3.5 text-ink-soft transition-transform duration-200 shrink-0 ml-2",
+                            showThemesInSelector ? "rotate-180 text-rose-deep" : "",
+                          ].join(" ")}
+                        />
+                      </button>
+
+                      {/* 16 Themes Palette Grid */}
+                      {showThemesInSelector && (
+                        <div className="mt-2.5 pt-2.5 border-t border-ink/8 grid grid-cols-2 gap-1.5 max-h-[190px] overflow-y-auto pr-1 custom-scrollbar animate-in fade-in">
+                          {THEMES.map((t) => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setTheme(t.id);
+                              }}
+                              className={[
+                                "flex items-center justify-between p-1.5 rounded-lg text-left text-xs font-medium cursor-pointer transition-all border",
+                                theme === t.id
+                                  ? "bg-rose/20 border-rose text-rose-deep font-bold shadow-xs"
+                                  : "border-transparent text-ink hover:bg-display hover:border-ink/5",
+                              ].join(" ")}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className={`size-3 shrink-0 rounded-full ${t.color} ring-1 ring-black/15 shadow-xs`} />
+                                <span className="truncate text-[11px] leading-none">{t.label}</span>
+                              </div>
+                              {theme === t.id && <Check className="size-3 text-rose-deep shrink-0 ml-1" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
               )}
             </div>
 
             {/* RIGHT COMPACT ACTIONS (RIGHT COLUMN) */}
-            <div className="flex items-center justify-end gap-1 sm:gap-1.5 shrink-0">
-              
-              {/* History Button */}
-              <button
-                onClick={() => setShowHistoryDrawer(true)}
-                className="calc-key relative size-8 sm:size-9 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center justify-center cursor-pointer shadow-xs transition-all"
-                title="Histórico de Cálculos & Exportação"
-                aria-label="Abrir histórico"
-              >
-                <History className="size-4 text-rose-deep shrink-0" />
-                {calculationHistory.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                    {calculationHistory.length > 9 ? "9+" : calculationHistory.length}
-                  </span>
-                )}
-              </button>
-
-              {/* 16 Visual Themes Dropdown */}
-              <div className="relative" ref={themeDropdownRef}>
-                <button
-                  onClick={() => setShowThemeMenu((prev) => !prev)}
-                  className="calc-key h-8 sm:h-9 px-2 sm:px-2.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
-                  title="Alterar Tema Visual"
-                >
-                  <span className={`size-3.5 rounded-full ${currentThemeObj.color} ring-1 ring-black/10 shadow-xs shrink-0`} />
-                  <span className="hidden lg:inline capitalize truncate max-w-[85px]">{currentThemeObj.label}</span>
-                  <ChevronDown className="size-3 text-ink-soft" />
-                </button>
-
-                {showThemeMenu && (
-                  <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top-right">
-                    <div className="flex items-center justify-between px-2 py-1 border-b border-ink/8 mb-2">
-                      <div className="flex items-center gap-1.5">
-                        <Palette className="size-3.5 text-rose-deep" />
-                        <span className="text-xs font-bold font-[family-name:var(--font-fredoka)] text-ink">
-                          16 Temas Visuais
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md">
-                        16 opções
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
-                      {THEMES.map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => {
-                            setTheme(t.id);
-                            setShowThemeMenu(false);
-                          }}
-                          className={[
-                            "flex items-center justify-between p-2 rounded-xl text-left text-xs font-medium cursor-pointer transition-all border",
-                            theme === t.id
-                              ? "bg-rose/20 border-rose text-rose-deep font-bold shadow-xs"
-                              : "border-transparent text-ink hover:bg-display/90 hover:border-ink/5",
-                          ].join(" ")}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className={`size-3.5 shrink-0 rounded-full ${t.color} ring-1 ring-black/15 shadow-xs`} />
-                            <div className="truncate">
-                              <p className="truncate text-xs font-semibold leading-none">{t.label}</p>
-                              <span className="text-[9px] text-ink-soft font-normal">{t.tag}</span>
-                            </div>
-                          </div>
-                          {theme === t.id && <Check className="size-3.5 text-rose-deep shrink-0 ml-1" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
+            <div className="flex items-center justify-end shrink-0">
               {/* User Account / Login CTA */}
               <Link
                 to="/login"
-                className="calc-key h-8 sm:h-9 px-2 sm:px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
+                className="calc-key h-8 sm:h-9 px-2.5 sm:px-3 rounded-xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
                 title={currentUser ? `Conectado como ${currentUser.name}` : "Entrar / Perfil"}
               >
                 {currentUser ? (

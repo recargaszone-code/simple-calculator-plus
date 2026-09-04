@@ -1292,7 +1292,7 @@ function Index() {
       {/* Footnote */}
       <footer className="w-full pb-6 px-4 text-center calc-fade-up">
         <p className="text-sm font-medium text-ink-soft">
-          Maxwell Você é o Melhro
+          Maxwell Você é o Melhor
         </p>
       </footer>
 

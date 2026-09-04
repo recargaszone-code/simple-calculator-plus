@@ -1,6 +1,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { Calculator, Keyboard, RotateCcw, Sparkles, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -54,6 +55,7 @@ function Index() {
   const [freshResult, setFreshResult] = useState<boolean>(false);
   const [popKey, setPopKey] = useState<number>(0);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
+  const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
   const pressedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerPop = useCallback(() => {
@@ -260,118 +262,233 @@ function Index() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-cream flex flex-col items-center justify-center px-5 py-10 text-ink">
-      {/* Brand mark */}
-      <div className="calc-fade-up mb-7 flex items-center gap-2.5">
-        <div className="size-9 rounded-2xl bg-rose grid place-items-center text-white text-lg font-[family-name:var(--font-fredoka)] font-semibold ring-1 ring-white/40">
-          +
-        </div>
-        <div className="leading-none">
-          <p className="text-lg font-[family-name:var(--font-fredoka)] font-semibold tracking-tight text-ink">
-            Calculadora
-          </p>
-          <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-ink-soft mt-0.5">
-            Plus
-          </p>
-        </div>
-      </div>
-
-      {/* Calculator card */}
-      <div className="calc-fade-up w-full max-w-[360px] rounded-[min(5vw,30px)] bg-sand ring-1 ring-ink/5 p-4 sm:p-5">
-        {/* Display */}
-        <div className="rounded-[min(4vw,20px)] bg-display ring-1 ring-ink/5 px-5 pt-5 pb-4 h-[148px] flex flex-col items-end justify-end overflow-hidden">
-          {/* History preview */}
-          <div className="w-full flex items-center justify-end gap-2 h-6 text-ink-soft">
-            <span className="text-lg font-medium font-[family-name:var(--font-quicksand)] truncate">
-              {history}
-            </span>
+    <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative">
+      {/* Tactile Navbar */}
+      <header className="w-full max-w-4xl mx-auto px-4 pt-4 sm:pt-6 z-20 calc-fade-up">
+        <nav className="w-full rounded-2xl bg-sand/85 backdrop-blur-md ring-1 ring-ink/5 px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          {/* Logo & Badge */}
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-rose grid place-items-center text-white text-base font-[family-name:var(--font-fredoka)] font-bold ring-1 ring-white/40 shadow-sm">
+              +
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink leading-none">
+                  Calculadora
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
+                  Plus
+                </span>
+              </div>
+              <p className="text-[11px] font-medium text-ink-soft leading-none mt-1">
+                Rápida & Precisa
+              </p>
+            </div>
           </div>
-          {/* Current result */}
-          <div className="w-full text-right mt-1">
-            <span
-              key={popKey}
-              className="calc-pop inline-block text-[52px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
+
+          {/* Quick Actions & Status */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Status indicator */}
+            <div className="hidden sm:flex items-center gap-1.5 bg-display px-3 py-1.5 rounded-xl ring-1 ring-ink/5">
+              <span className="size-2 rounded-full bg-mint animate-pulse" />
+              <span className="text-xs font-medium text-ink-soft">Online</span>
+            </div>
+
+            {/* Shortcuts button */}
+            <button
+              onClick={() => setShowShortcuts(true)}
+              className="calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-display ring-1 ring-ink/5 text-ink hover:bg-white text-xs font-semibold select-none cursor-pointer"
+              title="Ver atalhos do teclado"
             >
-              {display}
-            </span>
+              <Keyboard className="size-3.5 text-rose-deep" />
+              <span className="hidden sm:inline">Atalhos</span>
+            </button>
+
+            {/* Quick Clear button */}
+            <button
+              onClick={clearAll}
+              className="calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose text-white ring-1 ring-white/30 text-xs font-semibold select-none hover:bg-rose-deep cursor-pointer"
+              title="Limpar calculadora (Esc)"
+            >
+              <RotateCcw className="size-3.5" />
+              <span>Limpar</span>
+            </button>
           </div>
-          <div className="w-full flex items-center justify-end gap-1.5 mt-2">
-            <span className="size-1.5 rounded-full bg-rose"></span>
-            <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-              pronto
-            </span>
+        </nav>
+      </header>
+
+      {/* Main Content / Calculator */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-10">
+        <div className="calc-fade-up w-full max-w-[360px] rounded-[min(5vw,30px)] bg-sand ring-1 ring-ink/5 p-4 sm:p-5 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.06)]">
+          {/* Display */}
+          <div className="rounded-[min(4vw,20px)] bg-display ring-1 ring-ink/5 px-5 pt-5 pb-4 h-[148px] flex flex-col items-end justify-end overflow-hidden shadow-inner">
+            {/* History preview */}
+            <div className="w-full flex items-center justify-end gap-2 h-6 text-ink-soft">
+              <span className="text-lg font-medium font-[family-name:var(--font-quicksand)] truncate">
+                {history}
+              </span>
+            </div>
+            {/* Current result */}
+            <div className="w-full text-right mt-1">
+              <span
+                key={popKey}
+                className="calc-pop inline-block text-[52px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
+              >
+                {display}
+              </span>
+            </div>
+            <div className="w-full flex items-center justify-end gap-1.5 mt-2">
+              <span className="size-1.5 rounded-full bg-rose"></span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-ink-soft">
+                pronto
+              </span>
+            </div>
+          </div>
+
+          {/* Key grid */}
+          <div className="mt-4 grid grid-cols-4 gap-2.5 sm:gap-3">
+            {renderKey(
+              "AC",
+              "Escape",
+              "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+            {renderKey(
+              "±",
+              "±",
+              "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+            {renderKey(
+              "%",
+              "%",
+              "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+            {renderKey(
+              "÷",
+              "/",
+              "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+
+            {renderKey("7", "7", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("8", "8", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("9", "9", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey(
+              "×",
+              "*",
+              "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+
+            {renderKey("4", "4", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("5", "5", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("6", "6", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey(
+              "−",
+              "-",
+              "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+
+            {renderKey("1", "1", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("2", "2", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey("3", "3", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey(
+              "+",
+              "+",
+              "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
+            )}
+
+            {renderKey(
+              "0",
+              "0",
+              "bg-display ring-1 ring-ink/5 active:bg-sand",
+              2
+            )}
+            {renderKey(".", ".", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+            {renderKey(
+              "=",
+              "Enter",
+              "bg-mint text-ink text-3xl font-semibold ring-1 ring-white/40 active:brightness-95"
+            )}
           </div>
         </div>
-
-        {/* Key grid */}
-        <div className="mt-4 grid grid-cols-4 gap-2.5 sm:gap-3">
-          {renderKey(
-            "AC",
-            "Escape",
-            "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-          {renderKey(
-            "±",
-            "±",
-            "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-          {renderKey(
-            "%",
-            "%",
-            "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-          {renderKey(
-            "÷",
-            "/",
-            "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-
-          {renderKey("7", "7", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("8", "8", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("9", "9", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey(
-            "×",
-            "*",
-            "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-
-          {renderKey("4", "4", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("5", "5", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("6", "6", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey(
-            "−",
-            "-",
-            "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-
-          {renderKey("1", "1", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("2", "2", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey("3", "3", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey(
-            "+",
-            "+",
-            "bg-rose text-white text-3xl ring-1 ring-white/30 active:bg-rose-deep"
-          )}
-
-          {renderKey(
-            "0",
-            "0",
-            "bg-display ring-1 ring-ink/5 active:bg-sand",
-            2
-          )}
-          {renderKey(".", ".", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-          {renderKey(
-            "=",
-            "Enter",
-            "bg-mint text-ink text-3xl font-semibold ring-1 ring-white/40 active:brightness-95"
-          )}
-        </div>
-      </div>
+      </main>
 
       {/* Footnote */}
-      <p className="calc-fade-up mt-6 text-sm font-medium text-ink-soft text-center">
-        Maxwell Você é o Melhro
-      </p>
+      <footer className="w-full pb-6 px-4 text-center calc-fade-up">
+        <p className="text-sm font-medium text-ink-soft">
+          Maxwell Você é o Melhro
+        </p>
+      </footer>
+
+      {/* Shortcuts Modal */}
+      {showShortcuts && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-ink/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setShowShortcuts(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-sand p-6 ring-1 ring-ink/5 shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-xl bg-rose/15 text-rose-deep grid place-items-center">
+                  <Keyboard className="size-4" />
+                </div>
+                <h3 className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink">
+                  Atalhos do Teclado
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowShortcuts(false)}
+                className="size-8 rounded-full bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink-soft hover:text-ink cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between p-2 rounded-xl bg-display ring-1 ring-ink/5">
+                <span className="text-ink-soft">Números</span>
+                <kbd className="px-2 py-1 rounded-lg bg-sand font-mono text-xs font-bold text-ink ring-1 ring-ink/5">
+                  0 – 9
+                </kbd>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-display ring-1 ring-ink/5">
+                <span className="text-ink-soft">Operações</span>
+                <kbd className="px-2 py-1 rounded-lg bg-sand font-mono text-xs font-bold text-ink ring-1 ring-ink/5">
+                  + - * /
+                </kbd>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-display ring-1 ring-ink/5">
+                <span className="text-ink-soft">Calcular resultado</span>
+                <kbd className="px-2 py-1 rounded-lg bg-sand font-mono text-xs font-bold text-ink ring-1 ring-ink/5">
+                  Enter ou =
+                </kbd>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-display ring-1 ring-ink/5">
+                <span className="text-ink-soft">Limpar tudo</span>
+                <kbd className="px-2 py-1 rounded-lg bg-sand font-mono text-xs font-bold text-ink ring-1 ring-ink/5">
+                  Esc
+                </kbd>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-display ring-1 ring-ink/5">
+                <span className="text-ink-soft">Apagar dígito</span>
+                <kbd className="px-2 py-1 rounded-lg bg-sand font-mono text-xs font-bold text-ink ring-1 ring-ink/5">
+                  Backspace
+                </kbd>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowShortcuts(false)}
+              className="calc-key mt-5 w-full py-2.5 rounded-xl bg-mint text-ink font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm"
+            >
+              Entendido!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

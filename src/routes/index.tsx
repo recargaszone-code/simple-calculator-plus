@@ -854,20 +854,15 @@ function Index() {
               {/* User Account / Login CTA */}
               <Link
                 to="/login"
-                className={[
-                  "calc-key h-9 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs",
-                  currentUser
-                    ? "bg-mint/40 text-ink border border-mint hover:bg-mint/60 font-bold"
-                    : "bg-gradient-to-r from-rose to-rose-deep text-white shadow-rose/25 ring-1 ring-white/30 hover:brightness-105",
-                ].join(" ")}
+                className="calc-key h-9 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
                 title={currentUser ? `Conectado como ${currentUser.name}` : "Acessar ou Criar Conta"}
               >
                 {currentUser ? (
                   <>
-                    <div className="size-5 rounded-full bg-rose text-white text-[10px] font-bold grid place-items-center">
+                    <div className="size-5 rounded-full bg-gradient-to-tr from-rose to-rose-deep text-white text-[10px] font-bold grid place-items-center shadow-xs">
                       {currentUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden sm:inline truncate max-w-[80px]">
+                    <span className="hidden sm:inline truncate max-w-[80px] font-bold">
                       {currentUser.name.split(" ")[0]}
                     </span>
                   </>
@@ -917,7 +912,7 @@ function Index() {
             ) : (
               <div
                 className={[
-                  "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/90 dark:bg-sand/70 backdrop-blur-md border border-rose/25 shadow-xs flex items-center justify-between gap-2.5 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
+                  "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/90 dark:bg-sand/70 backdrop-blur-md border border-rose/30 shadow-xs flex items-center justify-between gap-2.5 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
                   scientificMode ? "max-w-[440px]" : "max-w-[360px]",
                 ].join(" ")}
               >
@@ -926,7 +921,7 @@ function Index() {
                     <div className="size-8 rounded-xl bg-gradient-to-tr from-rose to-rose-deep text-white text-xs font-bold grid place-items-center shadow-xs ring-2 ring-white/60">
                       {currentUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-emerald-500 rounded-full ring-2 ring-sand" />
+                    <span className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-rose rounded-full ring-2 ring-sand" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-1">
@@ -936,9 +931,9 @@ function Index() {
                       </span>
                       <span className="text-xs">👋</span>
                     </div>
-                    <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 leading-tight">
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                      Conta sincronizada
+                    <span className="text-[10px] font-semibold text-rose-deep flex items-center gap-1.5 leading-tight">
+                      <span className="size-1.5 rounded-full bg-rose animate-pulse inline-block" />
+                      Conta ativa
                     </span>
                   </div>
                 </div>
@@ -1080,7 +1075,11 @@ function Index() {
 
                 {renderKey("0", "0", "bg-display ring-1 ring-ink/5 active:bg-sand", 2)}
                 {renderKey(".", ".", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-                {renderKey("=", "Enter", "bg-mint text-ink text-2xl sm:text-3xl font-semibold ring-1 ring-white/40 active:brightness-95")}
+                {renderKey(
+                  "=",
+                  "Enter",
+                  "bg-gradient-to-tr from-rose to-rose-deep text-white text-2xl sm:text-3xl font-bold ring-1 ring-white/30 shadow-md shadow-rose/25 hover:brightness-105 active:scale-95"
+                )}
               </div>
             </div>
           </div>
@@ -1422,7 +1421,7 @@ function Index() {
                         title="Copiar resultado"
                       >
                         {copiedId === item.id ? (
-                          <Check className="size-4 text-mint" />
+                          <Check className="size-4 text-rose-deep" />
                         ) : (
                           <Copy className="size-3.5" />
                         )}
@@ -1436,7 +1435,7 @@ function Index() {
             {/* Close Button */}
             <button
               onClick={() => setShowHistoryDrawer(false)}
-              className="calc-key mt-4 w-full py-2.5 rounded-2xl bg-mint text-ink font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm"
+              className="calc-key mt-4 w-full py-2.5 rounded-2xl bg-gradient-to-r from-rose to-rose-deep text-white font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm shadow-rose/20 hover:brightness-105"
             >
               Fechar Histórico
             </button>
@@ -1508,7 +1507,7 @@ function Index() {
 
             <button
               onClick={() => setShowShortcuts(false)}
-              className="calc-key mt-5 w-full py-2.5 rounded-xl bg-mint text-ink font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm"
+              className="calc-key mt-5 w-full py-2.5 rounded-xl bg-gradient-to-r from-rose to-rose-deep text-white font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm shadow-rose/20 hover:brightness-105"
             >
               Entendido!
             </button>

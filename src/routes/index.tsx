@@ -15,6 +15,17 @@ import {
   Trash2,
   ArrowRightLeft,
   Atom,
+  User,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  LogIn,
+  LogOut,
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  UserCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -24,7 +35,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades, além de múltiplos temas visuais.",
+          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades, múltiplos temas visuais e tela de login de usuário.",
       },
       { property: "og:title", content: "Calculadora Plus — Rápida, Científica & Conversores" },
       {
@@ -39,7 +50,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Operator = "+" | "−" | "×" | "÷" | "^";
-type AppTab = "calc" | "currency" | "units";
+type AppTab = "calc" | "currency" | "units" | "account";
 type ThemeType = "candy" | "dark" | "sapphire" | "emerald";
 
 interface HistoryItem {
@@ -47,6 +58,11 @@ interface HistoryItem {
   expression: string;
   result: string;
   timestamp: string;
+}
+
+interface UserSession {
+  name: string;
+  email: string;
 }
 
 const MAX_DIGITS = 12;
@@ -77,7 +93,7 @@ type UnitCategory = "length" | "weight" | "temperature" | "speed" | "area";
 
 interface UnitDef {
   label: string;
-  ratio: number; // to base unit
+  ratio: number;
   toBase?: (v: number) => number;
   fromBase?: (v: number) => number;
 }
@@ -165,6 +181,16 @@ function Index() {
   const [theme, setTheme] = useState<ThemeType>("candy");
   const [showThemeMenu, setShowThemeMenu] = useState<boolean>(false);
 
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [authName, setAuthName] = useState<string>("");
+  const [authEmail, setAuthEmail] = useState<string>("");
+  const [authPassword, setAuthPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccessMsg, setAuthSuccessMsg] = useState<string | null>(null);
+
   // Calculator State
   const [display, setDisplay] = useState<string>("0");
   const [previous, setPrevious] = useState<number | null>(null);
@@ -202,17 +228,91 @@ function Index() {
     }
   }, [theme]);
 
-  // Load history from localStorage on client
+  // Load session & history from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("calc_history_plus");
-      if (saved) {
-        setCalculationHistory(JSON.parse(saved));
+      const savedUser = localStorage.getItem("calc_user_session");
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
+      }
+      const savedHist = localStorage.getItem("calc_history_plus");
+      if (savedHist) {
+        setCalculationHistory(JSON.parse(savedHist));
       }
     } catch {
       // safe fallback
     }
   }, []);
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+
+    if (!authEmail.trim() || !authEmail.includes("@")) {
+      setAuthError("Por favor, informe um e-mail válido.");
+      return;
+    }
+
+    if (authPassword.length < 4) {
+      setAuthError("A senha deve ter no mínimo 4 caracteres.");
+      return;
+    }
+
+    if (isSignUp && !authName.trim()) {
+      setAuthError("Por favor, digite seu nome.");
+      return;
+    }
+
+    const userName = isSignUp
+      ? authName.trim()
+      : authName.trim() || authEmail.split("@")[0];
+
+    const newSession: UserSession = {
+      name: userName,
+      email: authEmail.trim(),
+    };
+
+    setCurrentUser(newSession);
+    try {
+      localStorage.setItem("calc_user_session", JSON.stringify(newSession));
+    } catch {
+      // safe fallback
+    }
+
+    setAuthSuccessMsg(isSignUp ? "Conta criada com sucesso!" : "Login realizado com sucesso!");
+    setTimeout(() => {
+      setAuthSuccessMsg(null);
+      setAuthEmail("");
+      setAuthPassword("");
+      setAuthName("");
+    }, 1200);
+  };
+
+  const handleQuickDemoLogin = () => {
+    const demoSession: UserSession = {
+      name: "Maxwell",
+      email: "maxwell@calculadoraplus.com",
+    };
+    setCurrentUser(demoSession);
+    try {
+      localStorage.setItem("calc_user_session", JSON.stringify(demoSession));
+    } catch {
+      // safe fallback
+    }
+    setAuthSuccessMsg("Conectado instantaneamente como Maxwell!");
+    setTimeout(() => {
+      setAuthSuccessMsg(null);
+    }, 1000);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("calc_user_session");
+    } catch {
+      // safe fallback
+    }
+  };
 
   const saveHistoryItem = useCallback((expr: string, res: string) => {
     const newItem: HistoryItem = {
@@ -603,7 +703,10 @@ function Index() {
         <nav className="w-full rounded-3xl bg-sand/90 backdrop-blur-md ring-1 ring-ink/5 px-3 sm:px-5 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_10px_35px_rgb(0,0,0,0.05)]">
           {/* Logo Brand */}
           <div className="flex items-center justify-between w-full sm:w-auto">
-            <div className="flex items-center gap-2.5">
+            <div
+              onClick={() => setActiveTab("calc")}
+              className="flex items-center gap-2.5 cursor-pointer"
+            >
               <div className="size-9 rounded-2xl bg-rose grid place-items-center text-white text-base font-[family-name:var(--font-fredoka)] font-bold ring-1 ring-white/40 shadow-sm">
                 +
               </div>
@@ -622,8 +725,8 @@ function Index() {
               </div>
             </div>
 
-            {/* Mobile Tab Icons */}
-            <div className="flex sm:hidden items-center gap-1">
+            {/* Mobile Actions */}
+            <div className="flex sm:hidden items-center gap-1.5">
               <button
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
                 className="size-8 rounded-xl bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink cursor-pointer"
@@ -631,6 +734,7 @@ function Index() {
               >
                 <Palette className="size-4 text-rose" />
               </button>
+
               <button
                 onClick={() => setShowHistoryDrawer(true)}
                 className="size-8 rounded-xl bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink cursor-pointer relative"
@@ -646,8 +750,8 @@ function Index() {
             </div>
           </div>
 
-          {/* Navigation View Tabs */}
-          <div className="flex items-center bg-display p-1 rounded-2xl ring-1 ring-ink/5 w-full sm:w-auto justify-center gap-1">
+          {/* Navigation View Tabs (Includes prominent Conta / Login tab) */}
+          <div className="flex items-center bg-display p-1 rounded-2xl ring-1 ring-ink/5 w-full sm:w-auto justify-center gap-1 overflow-x-auto">
             <button
               onClick={() => setActiveTab("calc")}
               className={[
@@ -685,6 +789,22 @@ function Index() {
             >
               <Scale className="size-3.5" />
               <span>Unidades</span>
+            </button>
+
+            {/* TAB: LOGIN / CONTA */}
+            <button
+              onClick={() => setActiveTab("account")}
+              className={[
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
+                activeTab === "account"
+                  ? "bg-rose text-white shadow-sm ring-1 ring-white/30"
+                  : currentUser
+                  ? "text-rose-deep font-bold bg-mint/30 ring-1 ring-mint/40"
+                  : "text-ink-soft hover:text-ink",
+              ].join(" ")}
+            >
+              {currentUser ? <UserCheck className="size-3.5" /> : <LogIn className="size-3.5" />}
+              <span>{currentUser ? currentUser.name.split(" ")[0] : "Entrar"}</span>
             </button>
           </div>
 
@@ -724,28 +844,28 @@ function Index() {
                 >
                   <button
                     onClick={() => setTheme("candy")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display"
+                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
                   >
                     <span>Candy (Pastel)</span>
                     <span className="size-3 rounded-full bg-[#f29f9f]" />
                   </button>
                   <button
                     onClick={() => setTheme("dark")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display"
+                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
                   >
                     <span>Dark Velvet</span>
                     <span className="size-3 rounded-full bg-[#302b3d]" />
                   </button>
                   <button
                     onClick={() => setTheme("sapphire")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display"
+                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
                   >
                     <span>Azul Safira</span>
                     <span className="size-3 rounded-full bg-[#3b82f6]" />
                   </button>
                   <button
                     onClick={() => setTheme("emerald")}
-                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display"
+                    className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-ink hover:bg-display cursor-pointer"
                   >
                     <span>Esmeralda Zen</span>
                     <span className="size-3 rounded-full bg-[#10b981]" />
@@ -770,131 +890,165 @@ function Index() {
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-8">
         {/* VIEW 1: CALCULATOR (Standard & Scientific) */}
         {activeTab === "calc" && (
-          <div
-            className={[
-              "calc-fade-up w-full rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-4 sm:p-5 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)] transition-all duration-300",
-              scientificMode ? "max-w-[440px]" : "max-w-[360px]",
-            ].join(" ")}
-          >
-            {/* Scientific Toggle & Display Header */}
-            <div className="flex items-center justify-between mb-2.5 px-1">
-              <button
-                onClick={() => setScientificMode(!scientificMode)}
-                className={[
-                  "calc-key flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold ring-1 ring-ink/5 cursor-pointer select-none",
-                  scientificMode
-                    ? "bg-rose text-white ring-white/30"
-                    : "bg-display text-ink hover:bg-white",
-                ].join(" ")}
-                title="Alternar modo científico"
-              >
-                <Atom className="size-3.5" />
-                <span>Científica</span>
-              </button>
-
-              <button
-                onClick={clearAll}
-                className="calc-key flex items-center gap-1 px-2.5 py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-xs font-medium ring-1 ring-ink/5 cursor-pointer"
-                title="Limpar visor"
-              >
-                <RotateCcw className="size-3" />
-                <span>Limpar</span>
-              </button>
-            </div>
-
-            {/* Display Box */}
-            <div className="rounded-[min(4vw,22px)] bg-display ring-1 ring-ink/5 px-5 pt-4 pb-4 h-[142px] flex flex-col items-end justify-end overflow-hidden shadow-inner">
-              {/* History preview */}
-              <div className="w-full flex items-center justify-end gap-2 h-6 text-ink-soft">
-                <span className="text-base sm:text-lg font-medium font-[family-name:var(--font-quicksand)] truncate">
-                  {history}
-                </span>
-              </div>
-              {/* Main Number Display */}
-              <div className="w-full text-right mt-1">
-                <span
-                  key={popKey}
-                  className="calc-pop inline-block text-[44px] sm:text-[50px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
-                >
-                  {display}
-                </span>
-              </div>
-              <div className="w-full flex items-center justify-between gap-1.5 mt-2 text-[10px] font-medium text-ink-soft uppercase tracking-[0.16em]">
-                <span>{scientificMode ? "Modo Científico" : "Padrão"}</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="size-1.5 rounded-full bg-rose animate-ping"></span>
-                  <span>pronto</span>
+          <div className="flex flex-col items-center w-full">
+            {/* Quick Login Bar above Calculator if user is guest */}
+            {!currentUser ? (
+              <div className="w-full max-w-[360px] mb-3 px-3 py-2 rounded-2xl bg-sand/70 ring-1 ring-ink/5 flex items-center justify-between shadow-sm animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-rose animate-ping" />
+                  <span className="text-xs text-ink-soft font-medium">Modo visitante</span>
                 </div>
+                <button
+                  onClick={() => setActiveTab("account")}
+                  className="calc-key text-xs font-semibold px-2.5 py-1 rounded-xl bg-rose text-white hover:bg-rose-deep flex items-center gap-1 cursor-pointer shadow-sm"
+                >
+                  <LogIn className="size-3" />
+                  <span>Fazer Login</span>
+                </button>
               </div>
-            </div>
-
-            {/* Scientific Function Panel (Expanded) */}
-            {scientificMode && (
-              <div className="mt-3 grid grid-cols-4 sm:grid-cols-4 gap-2 animate-in fade-in duration-200">
-                {renderKey("√", "sqrt", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("sqrt")
-                )}
-                {renderKey("x²", "sqr", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("sqr")
-                )}
-                {renderKey("xʸ", "^", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyOperator("^")
-                )}
-                {renderKey("1/x", "inv", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("inv")
-                )}
-                {renderKey("sin", "sin", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("sin")
-                )}
-                {renderKey("cos", "cos", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("cos")
-                )}
-                {renderKey("tan", "tan", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("tan")
-                )}
-                {renderKey("ln", "ln", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("ln")
-                )}
-                {renderKey("log", "log", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("log")
-                )}
-                {renderKey("π", "pi", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("pi")
-                )}
-                {renderKey("e", "e", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("e")
-                )}
-                {renderKey("x³", "cube", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
-                  applyScientificFunction("cube")
-                )}
+            ) : (
+              <div className="w-full max-w-[360px] mb-3 px-3 py-1.5 rounded-2xl bg-mint/30 ring-1 ring-mint/50 flex items-center justify-between shadow-sm animate-in fade-in">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-rose-deep" />
+                  <span className="text-xs font-semibold text-ink">
+                    Olá, <strong className="text-rose-deep">{currentUser.name}</strong>!
+                  </span>
+                </div>
+                <button
+                  onClick={() => setActiveTab("account")}
+                  className="text-[11px] font-bold text-rose-deep underline cursor-pointer hover:opacity-80"
+                >
+                  Ver Perfil
+                </button>
               </div>
             )}
 
-            {/* Standard Keypad Grid */}
-            <div className="mt-3.5 grid grid-cols-4 gap-2 sm:gap-2.5">
-              {renderKey("AC", "Escape", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep")}
-              {renderKey("±", "±", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep", 1, toggleSign)}
-              {renderKey("%", "%", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep", 1, percentage)}
-              {renderKey("÷", "/", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+            <div
+              className={[
+                "calc-fade-up w-full rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-4 sm:p-5 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)] transition-all duration-300",
+                scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+              ].join(" ")}
+            >
+              {/* Scientific Toggle & Display Header */}
+              <div className="flex items-center justify-between mb-2.5 px-1">
+                <button
+                  onClick={() => setScientificMode(!scientificMode)}
+                  className={[
+                    "calc-key flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold ring-1 ring-ink/5 cursor-pointer select-none",
+                    scientificMode
+                      ? "bg-rose text-white ring-white/30"
+                      : "bg-display text-ink hover:bg-white",
+                  ].join(" ")}
+                  title="Alternar modo científico"
+                >
+                  <Atom className="size-3.5" />
+                  <span>Científica</span>
+                </button>
 
-              {renderKey("7", "7", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("8", "8", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("9", "9", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("×", "*", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+                <button
+                  onClick={clearAll}
+                  className="calc-key flex items-center gap-1 px-2.5 py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-xs font-medium ring-1 ring-ink/5 cursor-pointer"
+                  title="Limpar visor"
+                >
+                  <RotateCcw className="size-3" />
+                  <span>Limpar</span>
+                </button>
+              </div>
 
-              {renderKey("4", "4", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("5", "5", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("6", "6", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("−", "-", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+              {/* Display Box */}
+              <div className="rounded-[min(4vw,22px)] bg-display ring-1 ring-ink/5 px-5 pt-4 pb-4 h-[142px] flex flex-col items-end justify-end overflow-hidden shadow-inner">
+                {/* History preview */}
+                <div className="w-full flex items-center justify-end gap-2 h-6 text-ink-soft">
+                  <span className="text-base sm:text-lg font-medium font-[family-name:var(--font-quicksand)] truncate">
+                    {history}
+                  </span>
+                </div>
+                {/* Main Number Display */}
+                <div className="w-full text-right mt-1">
+                  <span
+                    key={popKey}
+                    className="calc-pop inline-block text-[44px] sm:text-[50px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
+                  >
+                    {display}
+                  </span>
+                </div>
+                <div className="w-full flex items-center justify-between gap-1.5 mt-2 text-[10px] font-medium text-ink-soft uppercase tracking-[0.16em]">
+                  <span>{scientificMode ? "Modo Científico" : "Padrão"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="size-1.5 rounded-full bg-rose animate-ping"></span>
+                    <span>pronto</span>
+                  </div>
+                </div>
+              </div>
 
-              {renderKey("1", "1", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("2", "2", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("3", "3", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("+", "+", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+              {/* Scientific Function Panel (Expanded) */}
+              {scientificMode && (
+                <div className="mt-3 grid grid-cols-4 sm:grid-cols-4 gap-2 animate-in fade-in duration-200">
+                  {renderKey("√", "sqrt", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("sqrt")
+                  )}
+                  {renderKey("x²", "sqr", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("sqr")
+                  )}
+                  {renderKey("xʸ", "^", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyOperator("^")
+                  )}
+                  {renderKey("1/x", "inv", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("inv")
+                  )}
+                  {renderKey("sin", "sin", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("sin")
+                  )}
+                  {renderKey("cos", "cos", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("cos")
+                  )}
+                  {renderKey("tan", "tan", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("tan")
+                  )}
+                  {renderKey("ln", "ln", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("ln")
+                  )}
+                  {renderKey("log", "log", "bg-display text-ink text-xs sm:text-sm ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("log")
+                  )}
+                  {renderKey("π", "pi", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("pi")
+                  )}
+                  {renderKey("e", "e", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("e")
+                  )}
+                  {renderKey("x³", "cube", "bg-display text-ink text-sm sm:text-base ring-1 ring-ink/5", 1, () =>
+                    applyScientificFunction("cube")
+                  )}
+                </div>
+              )}
 
-              {renderKey("0", "0", "bg-display ring-1 ring-ink/5 active:bg-sand", 2)}
-              {renderKey(".", ".", "bg-display ring-1 ring-ink/5 active:bg-sand")}
-              {renderKey("=", "Enter", "bg-mint text-ink text-2xl sm:text-3xl font-semibold ring-1 ring-white/40 active:brightness-95")}
+              {/* Standard Keypad Grid */}
+              <div className="mt-3.5 grid grid-cols-4 gap-2 sm:gap-2.5">
+                {renderKey("AC", "Escape", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep")}
+                {renderKey("±", "±", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep", 1, toggleSign)}
+                {renderKey("%", "%", "bg-rose text-white ring-1 ring-white/30 active:bg-rose-deep", 1, percentage)}
+                {renderKey("÷", "/", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+
+                {renderKey("7", "7", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("8", "8", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("9", "9", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("×", "*", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+
+                {renderKey("4", "4", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("5", "5", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("6", "6", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("−", "-", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+
+                {renderKey("1", "1", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("2", "2", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("3", "3", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("+", "+", "bg-rose text-white text-2xl sm:text-3xl ring-1 ring-white/30 active:bg-rose-deep")}
+
+                {renderKey("0", "0", "bg-display ring-1 ring-ink/5 active:bg-sand", 2)}
+                {renderKey(".", ".", "bg-display ring-1 ring-ink/5 active:bg-sand")}
+                {renderKey("=", "Enter", "bg-mint text-ink text-2xl sm:text-3xl font-semibold ring-1 ring-white/40 active:brightness-95")}
+              </div>
             </div>
           </div>
         )}
@@ -1134,6 +1288,224 @@ function Index() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* VIEW 4: DEDICATED LOGIN & PROFILE SCREEN */}
+        {activeTab === "account" && (
+          <div className="calc-fade-up w-full max-w-[420px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-6 sm:p-7 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
+            {currentUser ? (
+              /* User Profile Logged-in View */
+              <div className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-2xl bg-mint/40 text-ink grid place-items-center">
+                    <ShieldCheck className="size-5 text-rose-deep" />
+                  </div>
+                  <div>
+                    <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink leading-tight">
+                      Meu Perfil
+                    </h2>
+                    <p className="text-xs text-ink-soft">Gerencie sua sessão na Calculadora Plus</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-5 flex items-center gap-4 shadow-inner">
+                  <div className="size-14 rounded-2xl bg-rose text-white text-2xl font-bold grid place-items-center ring-2 ring-white/50 shadow-sm">
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink truncate">
+                      {currentUser.name}
+                    </p>
+                    <p className="text-xs text-ink-soft truncate font-medium">{currentUser.email}</p>
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-mint uppercase tracking-wider mt-1.5">
+                      <span className="size-2 rounded-full bg-mint" />
+                      Conta Ativa & Sincronizada
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-display/60 ring-1 ring-ink/5 p-4 text-xs text-ink-soft space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span>Cálculos registrados:</span>
+                    <span className="font-bold text-ink">{calculationHistory.length} operações</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Tema visual ativo:</span>
+                    <span className="font-bold text-ink capitalize">{theme}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Status da sessão:</span>
+                    <span className="font-bold text-emerald-600">Salvo localmente</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    onClick={() => setActiveTab("calc")}
+                    className="calc-key w-full py-3 rounded-2xl bg-rose text-white font-[family-name:var(--font-fredoka)] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:bg-rose-deep"
+                  >
+                    <Calculator className="size-4" />
+                    <span>Ir para a Calculadora</span>
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="calc-key w-full py-2.5 rounded-2xl bg-rose/15 text-rose-deep hover:bg-rose hover:text-white font-[family-name:var(--font-fredoka)] font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <LogOut className="size-3.5" />
+                    <span>Desconectar da Conta</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* User Login & Register Form View */
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="size-10 rounded-2xl bg-rose/15 text-rose-deep grid place-items-center">
+                    <User className="size-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink leading-tight">
+                      {isSignUp ? "Criar Nova Conta" : "Acessar sua Conta"}
+                    </h2>
+                    <p className="text-xs text-ink-soft">
+                      {isSignUp
+                        ? "Cadastre-se para salvar seus cálculos"
+                        : "Entre para sincronizar suas preferências"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tab Switcher: Entrar vs Cadastrar */}
+                <div className="flex bg-display p-1 rounded-2xl ring-1 ring-ink/5 mb-5 shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setAuthError(null);
+                    }}
+                    className={[
+                      "flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer",
+                      !isSignUp ? "bg-rose text-white shadow-sm ring-1 ring-white/30" : "text-ink-soft",
+                    ].join(" ")}
+                  >
+                    Já tenho conta (Entrar)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp(true);
+                      setAuthError(null);
+                    }}
+                    className={[
+                      "flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer",
+                      isSignUp ? "bg-rose text-white shadow-sm ring-1 ring-white/30" : "text-ink-soft",
+                    ].join(" ")}
+                  >
+                    Criar conta
+                  </button>
+                </div>
+
+                {/* Success alert message */}
+                {authSuccessMsg && (
+                  <div className="mb-4 p-3 rounded-2xl bg-mint/30 ring-1 ring-mint text-ink text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                    <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                    <span>{authSuccessMsg}</span>
+                  </div>
+                )}
+
+                {/* Error alert message */}
+                {authError && (
+                  <div className="mb-4 p-3 rounded-2xl bg-rose/15 ring-1 ring-rose-deep text-rose-deep text-xs font-semibold animate-in fade-in">
+                    {authError}
+                  </div>
+                )}
+
+                {/* Interactive Login Form */}
+                <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+                  {isSignUp && (
+                    <div>
+                      <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                        Seu Nome
+                      </label>
+                      <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
+                        <User className="size-4 text-ink-soft" />
+                        <input
+                          type="text"
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                          placeholder="Digite seu nome completo"
+                          className="w-full bg-transparent text-sm text-ink outline-none font-medium"
+                          required={isSignUp}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      E-mail
+                    </label>
+                    <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
+                      <Mail className="size-4 text-ink-soft" />
+                      <input
+                        type="email"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        placeholder="exemplo@calculadoraplus.com"
+                        className="w-full bg-transparent text-sm text-ink outline-none font-medium"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Senha
+                    </label>
+                    <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
+                      <Lock className="size-4 text-ink-soft" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-transparent text-sm text-ink outline-none font-medium"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-ink-soft hover:text-ink cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="calc-key w-full mt-2 py-3.5 rounded-2xl bg-rose text-white font-[family-name:var(--font-fredoka)] font-semibold text-sm shadow-md ring-1 ring-white/30 flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-deep active:scale-95 transition-all"
+                  >
+                    <LogIn className="size-4" />
+                    <span>{isSignUp ? "Concluir Cadastro Grátis" : "Entrar na Calculadora"}</span>
+                  </button>
+                </form>
+
+                {/* Quick 1-Click Demo Login button */}
+                <div className="mt-5 pt-4 border-t border-ink/10 text-center">
+                  <p className="text-[11px] text-ink-soft mb-2.5">Acesso rápido para testes:</p>
+                  <button
+                    onClick={handleQuickDemoLogin}
+                    className="calc-key w-full py-2.5 rounded-2xl bg-display hover:bg-white ring-1 ring-ink/5 text-xs font-semibold text-ink flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles className="size-4 text-rose-deep" />
+                    <span>Entrar como Maxwell (1 Clique)</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

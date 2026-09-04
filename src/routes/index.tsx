@@ -1184,7 +1184,7 @@ function Index() {
 
               {/* Categorized Dropdown Menu */}
               {showModeMenu && (
-                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 sm:w-84 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top max-h-[85vh] overflow-y-auto custom-scrollbar">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[calc(100vw-32px)] max-w-[340px] sm:w-84 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain custom-scrollbar">
                   
                   {/* Cálculos Group */}
                   <div className="px-2 py-1">

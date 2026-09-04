@@ -1,3 +1,4 @@
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -5,13 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
+ * Design system definition with multi-theme support.
  */
 
 @theme inline {
@@ -41,22 +36,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Calculator-specific semantic tokens */
+  /* Calculator semantic tokens */
   --color-cream: var(--cream);
   --color-sand: var(--sand);
   --color-ink: var(--ink);
@@ -74,10 +55,11 @@
   --font-quicksand: "Quicksand", system-ui, sans-serif;
 }
 
-:root {
+:root,
+[data-theme="candy"] {
   --radius: 0.625rem;
 
-  /* Soft candy tactile palette */
+  /* Theme 1: Soft Candy Tactile (Padrão) */
   --cream: oklch(0.977 0.011 63.22);
   --sand: oklch(0.934 0.021 67.51);
   --ink: oklch(0.359 0.040 300.29);
@@ -90,7 +72,6 @@
   --lilac: oklch(0.806 0.069 300.07);
   --display: oklch(0.995 0.003 67.39);
 
-  /* Mapped to shadcn semantic tokens */
   --background: var(--cream);
   --foreground: var(--ink);
   --card: var(--sand);
@@ -110,33 +91,22 @@
   --border: oklch(0.359 0.040 300.29 / 8%);
   --input: oklch(0.359 0.040 300.29 / 10%);
   --ring: var(--rose);
-  --chart-1: var(--rose);
-  --chart-2: var(--mint);
-  --chart-3: var(--sky);
-  --chart-4: var(--butter);
-  --chart-5: var(--lilac);
-  --sidebar: var(--sand);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--rose);
-  --sidebar-primary-foreground: oklch(0.995 0.003 67.39);
-  --sidebar-accent: var(--mint);
-  --sidebar-accent-foreground: var(--ink);
-  --sidebar-border: oklch(0.359 0.040 300.29 / 10%);
-  --sidebar-ring: var(--rose);
 }
 
+/* Theme 2: Dark Velvet / Neon */
+[data-theme="dark"],
 .dark {
-  --cream: oklch(0.220 0.025 300.29);
-  --sand: oklch(0.280 0.030 300.29);
-  --ink: oklch(0.940 0.015 300.29);
-  --ink-soft: oklch(0.720 0.025 300.29);
-  --rose: oklch(0.650 0.100 7.69);
-  --rose-deep: oklch(0.580 0.120 8.10);
-  --butter: oklch(0.720 0.090 79.36);
-  --mint: oklch(0.700 0.070 162.58);
-  --sky: oklch(0.680 0.060 238.84);
-  --lilac: oklch(0.700 0.060 300.07);
-  --display: oklch(0.320 0.020 300.29);
+  --cream: oklch(0.180 0.025 270.0);
+  --sand: oklch(0.245 0.030 270.0);
+  --ink: oklch(0.960 0.015 270.0);
+  --ink-soft: oklch(0.720 0.035 270.0);
+  --rose: oklch(0.640 0.180 325.0);
+  --rose-deep: oklch(0.550 0.200 325.0);
+  --butter: oklch(0.750 0.120 80.0);
+  --mint: oklch(0.760 0.140 165.0);
+  --sky: oklch(0.720 0.120 240.0);
+  --lilac: oklch(0.700 0.100 300.0);
+  --display: oklch(0.290 0.030 270.0);
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -154,22 +124,79 @@
   --accent-foreground: var(--ink);
   --destructive: var(--rose-deep);
   --destructive-foreground: oklch(0.995 0.003 67.39);
-  --border: oklch(0.940 0.015 300.29 / 12%);
-  --input: oklch(0.940 0.015 300.29 / 15%);
+  --border: oklch(0.960 0.015 270.0 / 12%);
+  --input: oklch(0.960 0.015 270.0 / 15%);
   --ring: var(--rose);
-  --chart-1: var(--rose);
-  --chart-2: var(--mint);
-  --chart-3: var(--sky);
-  --chart-4: var(--butter);
-  --chart-5: var(--lilac);
-  --sidebar: var(--sand);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--rose);
-  --sidebar-primary-foreground: oklch(0.995 0.003 67.39);
-  --sidebar-accent: var(--mint);
-  --sidebar-accent-foreground: var(--ink);
-  --sidebar-border: oklch(0.940 0.015 300.29 / 12%);
-  --sidebar-ring: var(--rose);
+}
+
+/* Theme 3: Ocean Sapphire */
+[data-theme="sapphire"] {
+  --cream: oklch(0.965 0.025 240.0);
+  --sand: oklch(0.910 0.045 240.0);
+  --ink: oklch(0.260 0.070 250.0);
+  --ink-soft: oklch(0.530 0.055 245.0);
+  --rose: oklch(0.580 0.190 248.0);
+  --rose-deep: oklch(0.480 0.210 248.0);
+  --butter: oklch(0.850 0.110 85.0);
+  --mint: oklch(0.760 0.140 205.0);
+  --sky: oklch(0.720 0.140 235.0);
+  --lilac: oklch(0.760 0.090 290.0);
+  --display: oklch(0.995 0.010 240.0);
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: oklch(0.995 0.003 67.39);
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: oklch(0.995 0.003 67.39);
+  --border: oklch(0.260 0.070 250.0 / 10%);
+  --input: oklch(0.260 0.070 250.0 / 12%);
+  --ring: var(--rose);
+}
+
+/* Theme 4: Emerald Zen */
+[data-theme="emerald"] {
+  --cream: oklch(0.970 0.020 150.0);
+  --sand: oklch(0.915 0.040 150.0);
+  --ink: oklch(0.270 0.060 155.0);
+  --ink-soft: oklch(0.540 0.050 150.0);
+  --rose: oklch(0.600 0.150 155.0);
+  --rose-deep: oklch(0.500 0.170 155.0);
+  --butter: oklch(0.860 0.110 80.0);
+  --mint: oklch(0.780 0.130 130.0);
+  --sky: oklch(0.750 0.080 190.0);
+  --lilac: oklch(0.780 0.070 110.0);
+  --display: oklch(0.995 0.008 150.0);
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: oklch(0.995 0.003 67.39);
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: oklch(0.995 0.003 67.39);
+  --border: oklch(0.270 0.060 155.0 / 10%);
+  --input: oklch(0.270 0.060 155.0 / 12%);
+  --ring: var(--rose);
 }
 
 @layer base {
@@ -181,6 +208,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-quicksand);
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 }
 
@@ -215,15 +243,28 @@
 }
 
 .calc-fade-up {
-  animation: calc-fade-up 0.5s ease-out both;
+  animation: calc-fade-up 0.4s ease-out both;
 }
 
 .calc-key {
   transition: transform 110ms cubic-bezier(0.3, 0.72, 0, 1),
-    background-color 110ms ease, filter 110ms ease;
+    background-color 110ms ease, filter 110ms ease, box-shadow 110ms ease;
 }
 
 .calc-key:active,
 .calc-key.pressed {
   transform: scale(0.95);
+}
+
+/* Custom scrollbar for history drawer */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ink-soft);
+  opacity: 0.3;
+  border-radius: 9999px;
 }

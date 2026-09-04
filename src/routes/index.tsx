@@ -1142,31 +1142,33 @@ function Index() {
       {/* ULTRA CLEAN & MODERN REDESIGNED NAVBAR */}
       <header className="sticky top-0 z-40 w-full pt-2.5 sm:pt-4 px-2 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <nav className="w-full rounded-2xl bg-sand/90 dark:bg-sand/80 backdrop-blur-xl border border-ink/8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-2.5 sm:px-4 py-2 flex items-center justify-between gap-2 transition-all">
+          <nav className="w-full rounded-2xl bg-sand/90 dark:bg-sand/80 backdrop-blur-xl border border-ink/8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-2.5 sm:px-4 py-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 transition-all">
             
-            {/* BRAND / LOGO */}
-            <div
-              onClick={() => setActiveTab("calc")}
-              className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
-            >
-              <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-sm sm:text-base font-[family-name:var(--font-fredoka)] font-bold shadow-sm shadow-rose/25 group-hover:scale-105 transition-transform duration-200">
-                +
-              </div>
-              <div className="hidden xs:flex items-center gap-1">
-                <span className="font-[family-name:var(--font-fredoka)] font-semibold text-sm sm:text-base text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
-                  Calculadora
-                </span>
-                <span className="text-[9px] uppercase font-black tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
-                  Plus
-                </span>
+            {/* BRAND / LOGO (LEFT COLUMN) */}
+            <div className="flex items-center justify-start min-w-0">
+              <div
+                onClick={() => setActiveTab("calc")}
+                className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
+              >
+                <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-sm sm:text-base font-[family-name:var(--font-fredoka)] font-bold shadow-sm shadow-rose/25 group-hover:scale-105 transition-transform duration-200">
+                  +
+                </div>
+                <div className="hidden xs:flex items-center gap-1">
+                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-sm sm:text-base text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
+                    Calculadora
+                  </span>
+                  <span className="text-[9px] uppercase font-black tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
+                    Plus
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* ULTRA-MINIMALIST CENTRAL MODE SELECTOR */}
-            <div className="relative" ref={modeDropdownRef}>
+            {/* ULTRA-MINIMALIST CENTRAL MODE SELECTOR (EXACT CENTER COLUMN) */}
+            <div className="flex items-center justify-center relative" ref={modeDropdownRef}>
               <button
                 onClick={() => setShowModeMenu((prev) => !prev)}
-                className="calc-key flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 text-xs sm:text-sm font-semibold select-none cursor-pointer shadow-xs transition-all"
+                className="calc-key flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 text-xs sm:text-sm font-semibold select-none cursor-pointer shadow-xs transition-all whitespace-nowrap"
                 title="Alternar Modo / Ferramenta"
                 aria-expanded={showModeMenu}
               >
@@ -1284,8 +1286,8 @@ function Index() {
               )}
             </div>
 
-            {/* RIGHT COMPACT ACTIONS */}
-            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* RIGHT COMPACT ACTIONS (RIGHT COLUMN) */}
+            <div className="flex items-center justify-end gap-1 sm:gap-1.5 shrink-0">
               
               {/* History Button */}
               <button

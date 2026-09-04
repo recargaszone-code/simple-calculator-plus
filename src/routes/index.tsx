@@ -245,9 +245,11 @@ const DARK_THEME_IDS: ThemeType[] = ["dark", "cyberpunk", "midnight", "crimson",
 function Index() {
   // App navigation state
   const [activeTab, setActiveTab] = useState<AppTab>("calc");
+  const [showModeMenu, setShowModeMenu] = useState<boolean>(false);
   const [scientificMode, setScientificMode] = useState<boolean>(false);
   const [theme, setTheme] = useState<ThemeType>("candy");
   const [showThemeMenu, setShowThemeMenu] = useState<boolean>(false);
+  const modeDropdownRef = useRef<HTMLDivElement | null>(null);
   const themeDropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Authentication State
@@ -348,21 +350,22 @@ function Index() {
     }
   }, [theme]);
 
-  // Click outside to close theme dropdown
+  // Click outside to close mode & theme dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        themeDropdownRef.current &&
-        !themeDropdownRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(target)) {
         setShowThemeMenu(false);
       }
+      if (modeDropdownRef.current && !modeDropdownRef.current.contains(target)) {
+        setShowModeMenu(false);
+      }
     }
-    if (showThemeMenu) {
+    if (showThemeMenu || showModeMenu) {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showThemeMenu]);
+  }, [showThemeMenu, showModeMenu]);
 
   // Load session & history & memory from localStorage
   useEffect(() => {
@@ -1079,6 +1082,54 @@ function Index() {
     }
   };
 
+  // Modes metadata for minimalist dropdown selector
+  const MODE_ITEMS: {
+    id: AppTab;
+    label: string;
+    category: "Cálculos" | "Conversores";
+    desc: string;
+    icon: typeof Calculator;
+  }[] = [
+    {
+      id: "calc",
+      label: "Calculadora",
+      category: "Cálculos",
+      desc: "Padrão, Científica e Constantes",
+      icon: Calculator,
+    },
+    {
+      id: "finance",
+      label: "Financeiro",
+      category: "Cálculos",
+      desc: "Juros compostos, parcelas e gorjetas",
+      icon: TrendingUp,
+    },
+    {
+      id: "dates",
+      label: "Datas & Horas",
+      category: "Cálculos",
+      desc: "Diferença de dias e horas de trabalho",
+      icon: Calendar,
+    },
+    {
+      id: "currency",
+      label: "Moedas & Câmbio",
+      category: "Conversores",
+      desc: "Cotações cambiais atualizadas",
+      icon: Coins,
+    },
+    {
+      id: "units",
+      label: "Medidas & Unidades",
+      category: "Conversores",
+      desc: "Comprimento, peso, área e temperatura",
+      icon: Scale,
+    },
+  ];
+
+  const currentModeObj = MODE_ITEMS.find((m) => m.id === activeTab) || MODE_ITEMS[0];
+  const CurrentModeIcon = currentModeObj.icon;
+
   const currentThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
   const compoundRes = calculateCompoundInterest();
   const loanRes = calculateLoan();
@@ -1111,77 +1162,126 @@ function Index() {
               </div>
             </div>
 
-            {/* CENTER SEGMENTED NAVIGATION TABS (NO SCROLLBAR) */}
-            <div className="flex items-center bg-display/90 p-1 rounded-xl border border-ink/6 shadow-inner no-scrollbar overflow-x-auto gap-0.5 sm:gap-1">
+            {/* ULTRA-MINIMALIST CENTRAL MODE SELECTOR */}
+            <div className="relative" ref={modeDropdownRef}>
               <button
-                onClick={() => setActiveTab("calc")}
-                className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
-                  activeTab === "calc"
-                    ? "bg-rose text-white shadow-xs"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
-                ].join(" ")}
-                title="Calculadora Padrão e Científica"
+                onClick={() => setShowModeMenu((prev) => !prev)}
+                className="calc-key flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 text-xs sm:text-sm font-semibold select-none cursor-pointer shadow-xs transition-all"
+                title="Alternar Modo / Ferramenta"
+                aria-expanded={showModeMenu}
               >
-                <Calculator className="size-3.5 shrink-0" />
-                <span className="hidden sm:inline">Calculadora</span>
+                <div className="size-5 rounded-lg bg-rose/15 text-rose-deep grid place-items-center shrink-0">
+                  <CurrentModeIcon className="size-3" />
+                </div>
+                <span className="font-[family-name:var(--font-fredoka)] font-semibold tracking-tight">
+                  {currentModeObj.label}
+                </span>
+                <ChevronDown
+                  className={[
+                    "size-3.5 text-ink-soft transition-transform duration-200",
+                    showModeMenu ? "rotate-180 text-rose-deep" : "",
+                  ].join(" ")}
+                />
               </button>
 
-              <button
-                onClick={() => setActiveTab("finance")}
-                className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
-                  activeTab === "finance"
-                    ? "bg-rose text-white shadow-xs"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
-                ].join(" ")}
-                title="Modo Financeiro: Juros, Parcelas e Descontos"
-              >
-                <TrendingUp className="size-3.5 shrink-0" />
-                <span className="hidden sm:inline">Financeiro</span>
-              </button>
+              {/* Categorized Dropdown Menu */}
+              {showModeMenu && (
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 sm:w-80 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top">
+                  
+                  {/* Cálculos Group */}
+                  <div className="px-2 py-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft/80">
+                      Cálculos
+                    </span>
+                  </div>
+                  <div className="space-y-1 mb-2">
+                    {MODE_ITEMS.filter((item) => item.category === "Cálculos").map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setActiveTab(item.id);
+                            setShowModeMenu(false);
+                          }}
+                          className={[
+                            "w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all border",
+                            isSelected
+                              ? "bg-rose/20 border-rose text-rose-deep shadow-xs"
+                              : "border-transparent text-ink hover:bg-display/90 hover:border-ink/5",
+                          ].join(" ")}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={[
+                                "size-7 rounded-xl grid place-items-center shrink-0",
+                                isSelected ? "bg-rose text-white shadow-xs" : "bg-display text-ink-soft",
+                              ].join(" ")}
+                            >
+                              <Icon className="size-3.5" />
+                            </div>
+                            <div className="truncate">
+                              <p className="text-xs font-semibold leading-tight">{item.label}</p>
+                              <p className="text-[10px] text-ink-soft truncate font-normal leading-tight">
+                                {item.desc}
+                              </p>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="size-3.5 text-rose-deep shrink-0 ml-2" />}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <button
-                onClick={() => setActiveTab("dates")}
-                className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
-                  activeTab === "dates"
-                    ? "bg-rose text-white shadow-xs"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
-                ].join(" ")}
-                title="Calculadora de Datas e Horas"
-              >
-                <Calendar className="size-3.5 shrink-0" />
-                <span className="hidden sm:inline">Datas</span>
-              </button>
+                  {/* Conversores Group */}
+                  <div className="px-2 py-1 border-t border-ink/8 pt-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft/80">
+                      Conversores
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {MODE_ITEMS.filter((item) => item.category === "Conversores").map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setActiveTab(item.id);
+                            setShowModeMenu(false);
+                          }}
+                          className={[
+                            "w-full flex items-center justify-between p-2 rounded-xl text-left cursor-pointer transition-all border",
+                            isSelected
+                              ? "bg-rose/20 border-rose text-rose-deep shadow-xs"
+                              : "border-transparent text-ink hover:bg-display/90 hover:border-ink/5",
+                          ].join(" ")}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={[
+                                "size-7 rounded-xl grid place-items-center shrink-0",
+                                isSelected ? "bg-rose text-white shadow-xs" : "bg-display text-ink-soft",
+                              ].join(" ")}
+                            >
+                              <Icon className="size-3.5" />
+                            </div>
+                            <div className="truncate">
+                              <p className="text-xs font-semibold leading-tight">{item.label}</p>
+                              <p className="text-[10px] text-ink-soft truncate font-normal leading-tight">
+                                {item.desc}
+                              </p>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="size-3.5 text-rose-deep shrink-0 ml-2" />}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <button
-                onClick={() => setActiveTab("currency")}
-                className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
-                  activeTab === "currency"
-                    ? "bg-rose text-white shadow-xs"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
-                ].join(" ")}
-                title="Conversor de Moedas"
-              >
-                <Coins className="size-3.5 shrink-0" />
-                <span className="hidden md:inline">Moedas</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("units")}
-                className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
-                  activeTab === "units"
-                    ? "bg-rose text-white shadow-xs"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
-                ].join(" ")}
-                title="Conversor de Medidas"
-              >
-                <Scale className="size-3.5 shrink-0" />
-                <span className="hidden md:inline">Medidas</span>
-              </button>
+                </div>
+              )}
             </div>
 
             {/* RIGHT COMPACT ACTIONS */}

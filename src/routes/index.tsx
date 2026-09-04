@@ -16,27 +16,23 @@ import {
   Atom,
   LogIn,
   Sparkles,
-  UserCheck,
   ChevronDown,
-  Moon,
-  Sun,
-  Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Calculadora Plus — Rápida, Científica & Conversores" },
+      { title: "Calculadora Plus — Rápida, Científica & 16 Temas" },
       {
         name: "description",
         content:
-          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades, múltiplos temas visuais e tela de login de usuário.",
+          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades, 16 temas visuais e tela de login de usuário.",
       },
-      { property: "og:title", content: "Calculadora Plus — Rápida, Científica & Conversores" },
+      { property: "og:title", content: "Calculadora Plus — Rápida, Científica & 16 Temas" },
       {
         property: "og:description",
         content:
-          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades.",
+          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades com 16 temas visuais exclusivos.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -46,7 +42,24 @@ export const Route = createFileRoute("/")({
 
 type Operator = "+" | "−" | "×" | "÷" | "^";
 type AppTab = "calc" | "currency" | "units";
-type ThemeType = "candy" | "dark" | "sapphire" | "emerald";
+
+export type ThemeType =
+  | "candy"
+  | "dark"
+  | "sapphire"
+  | "emerald"
+  | "sunset"
+  | "lavender"
+  | "cyberpunk"
+  | "nordic"
+  | "midnight"
+  | "matcha"
+  | "crimson"
+  | "retro"
+  | "autumn"
+  | "galaxy"
+  | "solar"
+  | "bubblegum";
 
 interface HistoryItem {
   id: string;
@@ -169,12 +182,27 @@ const UNIT_DATA: Record<
   },
 };
 
-const THEMES: { id: ThemeType; label: string; color: string }[] = [
-  { id: "candy", label: "Candy Pastel", color: "bg-[#f29f9f]" },
-  { id: "dark", label: "Dark Velvet", color: "bg-[#453a5e]" },
-  { id: "sapphire", label: "Azul Safira", color: "bg-[#3b82f6]" },
-  { id: "emerald", label: "Esmeralda", color: "bg-[#10b981]" },
+// 16 TEMAS VISUAIS COMPLETOS
+const THEMES: { id: ThemeType; label: string; tag: string; color: string; ring: string }[] = [
+  { id: "candy", label: "Candy Pastel", tag: "Claro", color: "bg-[#f29f9f]", ring: "ring-[#f29f9f]" },
+  { id: "dark", label: "Dark Velvet", tag: "Escuro", color: "bg-[#a855f7]", ring: "ring-[#a855f7]" },
+  { id: "sapphire", label: "Azul Safira", tag: "Oceano", color: "bg-[#2563eb]", ring: "ring-[#2563eb]" },
+  { id: "emerald", label: "Esmeralda Zen", tag: "Natureza", color: "bg-[#059669]", ring: "ring-[#059669]" },
+  { id: "sunset", label: "Pôr do Sol", tag: "Quente", color: "bg-[#ea580c]", ring: "ring-[#ea580c]" },
+  { id: "lavender", label: "Lavanda Dream", tag: "Floral", color: "bg-[#9333ea]", ring: "ring-[#9333ea]" },
+  { id: "cyberpunk", label: "Cyberpunk", tag: "Neon", color: "bg-[#eab308]", ring: "ring-[#eab308]" },
+  { id: "nordic", label: "Nórdico Minimal", tag: "Clean", color: "bg-[#475569]", ring: "ring-[#475569]" },
+  { id: "midnight", label: "Meia-Noite OLED", tag: "Preto", color: "bg-[#0ea5e9]", ring: "ring-[#0ea5e9]" },
+  { id: "matcha", label: "Matcha Latte", tag: "Pastel", color: "bg-[#606c38]", ring: "ring-[#606c38]" },
+  { id: "crimson", label: "Rubi Carmesim", tag: "Elegante", color: "bg-[#e11d48]", ring: "ring-[#e11d48]" },
+  { id: "retro", label: "Retrô 90s", tag: "Vaporwave", color: "bg-[#db2777]", ring: "ring-[#db2777]" },
+  { id: "autumn", label: "Outono Dourado", tag: "Terroso", color: "bg-[#d97706]", ring: "ring-[#d97706]" },
+  { id: "galaxy", label: "Galáxia Cósmica", tag: "Cósmico", color: "bg-[#8b5cf6]", ring: "ring-[#8b5cf6]" },
+  { id: "solar", label: "Solar Amistoso", tag: "Alegre", color: "bg-[#ca8a04]", ring: "ring-[#ca8a04]" },
+  { id: "bubblegum", label: "Bubblegum Pop", tag: "Vibrante", color: "bg-[#f43f5e]", ring: "ring-[#f43f5e]" },
 ];
+
+const DARK_THEME_IDS: ThemeType[] = ["dark", "cyberpunk", "midnight", "crimson", "galaxy"];
 
 function Index() {
   // App navigation state
@@ -212,14 +240,31 @@ function Index() {
   const [fromUnit, setFromUnit] = useState<string>("m");
   const [toUnit, setToUnit] = useState<string>("km");
 
-  // Apply Theme
+  // Load saved theme from localStorage on initial render
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("calc_theme_selection") as ThemeType;
+      if (savedTheme && THEMES.some((t) => t.id === savedTheme)) {
+        setTheme(savedTheme);
+      }
+    } catch {
+      // safe fallback
+    }
+  }, []);
+
+  // Apply Theme to document root
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", theme);
-      if (theme === "dark") {
+      if (DARK_THEME_IDS.includes(theme)) {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
+      }
+      try {
+        localStorage.setItem("calc_theme_selection", theme);
+      } catch {
+        // safe fallback
       }
     }
   }, [theme]);
@@ -638,6 +683,8 @@ function Index() {
     }
   };
 
+  const currentThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
+
   return (
     <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative transition-colors duration-300 antialiased selection:bg-rose/20">
       {/* PREMIUM MODERN REDESIGNED NAVBAR */}
@@ -663,7 +710,7 @@ function Index() {
                   </span>
                 </div>
                 <span className="hidden sm:inline-block text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
-                  Rápida & Científica
+                  16 Temas & Conversores
                 </span>
               </div>
             </div>
@@ -733,44 +780,63 @@ function Index() {
                 )}
               </button>
 
-              {/* Theme Dropdown */}
+              {/* 16 Visual Themes Dropdown */}
               <div className="relative" ref={themeDropdownRef}>
                 <button
                   onClick={() => setShowThemeMenu((prev) => !prev)}
                   className="calc-key h-9 px-2 sm:px-2.5 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
-                  title="Alterar Tema de Cores"
+                  title="Seletor de 16 Temas Visuais"
                 >
+                  <span className={`size-3 rounded-full ${currentThemeObj.color} ring-1 ring-black/10 shadow-xs`} />
                   <Palette className="size-4 text-rose-deep shrink-0" />
-                  <span className="hidden lg:inline capitalize">{theme}</span>
+                  <span className="hidden xl:inline capitalize truncate max-w-[90px]">{currentThemeObj.label}</span>
+                  <span className="text-[10px] bg-rose/15 text-rose-deep font-bold px-1 rounded-md hidden lg:inline">
+                    16
+                  </span>
                   <ChevronDown className="size-3 text-ink-soft hidden sm:inline" />
                 </button>
 
                 {showThemeMenu && (
-                  <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-sand/95 backdrop-blur-xl p-1.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top-right">
-                    <div className="px-2.5 py-1.5 text-[10px] uppercase font-bold tracking-wider text-ink-soft border-b border-ink/8 mb-1">
-                      Temas Visuais
+                  <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-sand/95 dark:bg-sand/90 backdrop-blur-2xl p-2.5 border border-ink/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 origin-top-right">
+                    <div className="flex items-center justify-between px-2 py-1 border-b border-ink/8 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <Palette className="size-3.5 text-rose-deep" />
+                        <span className="text-xs font-bold font-[family-name:var(--font-fredoka)] text-ink">
+                          16 Temas Visuais
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md">
+                        16 opções
+                      </span>
                     </div>
-                    {THEMES.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => {
-                          setTheme(t.id);
-                          setShowThemeMenu(false);
-                        }}
-                        className={[
-                          "w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium cursor-pointer transition-colors",
-                          theme === t.id
-                            ? "bg-rose/15 text-rose-deep font-semibold"
-                            : "text-ink hover:bg-display",
-                        ].join(" ")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`size-3 rounded-full ${t.color} ring-1 ring-black/10 shadow-xs`} />
-                          <span>{t.label}</span>
-                        </div>
-                        {theme === t.id && <Check className="size-3.5 text-rose-deep" />}
-                      </button>
-                    ))}
+
+                    {/* Scrollable 2-Column Grid for 16 Themes */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
+                      {THEMES.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => {
+                            setTheme(t.id);
+                            setShowThemeMenu(false);
+                          }}
+                          className={[
+                            "flex items-center justify-between p-2 rounded-xl text-left text-xs font-medium cursor-pointer transition-all border",
+                            theme === t.id
+                              ? "bg-rose/20 border-rose text-rose-deep font-bold shadow-xs"
+                              : "border-transparent text-ink hover:bg-display/90 hover:border-ink/5",
+                          ].join(" ")}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`size-3.5 shrink-0 rounded-full ${t.color} ring-1 ring-black/15 shadow-xs`} />
+                            <div className="truncate">
+                              <p className="truncate text-xs font-semibold leading-none">{t.label}</p>
+                              <span className="text-[9px] text-ink-soft font-normal">{t.tag}</span>
+                            </div>
+                          </div>
+                          {theme === t.id && <Check className="size-3.5 text-rose-deep shrink-0 ml-1" />}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

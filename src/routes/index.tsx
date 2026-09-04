@@ -1088,122 +1088,115 @@ function Index() {
 
   return (
     <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative transition-colors duration-300 antialiased selection:bg-rose/20">
-      {/* PREMIUM MODERN REDESIGNED NAVBAR */}
-      <header className="sticky top-0 z-40 w-full pt-3 sm:pt-4 px-3 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <nav className="w-full rounded-2xl sm:rounded-3xl bg-sand/85 dark:bg-sand/75 backdrop-blur-xl border border-ink/8 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
+      {/* ULTRA CLEAN & MODERN REDESIGNED NAVBAR */}
+      <header className="sticky top-0 z-40 w-full pt-2.5 sm:pt-4 px-2 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <nav className="w-full rounded-2xl bg-sand/90 dark:bg-sand/80 backdrop-blur-xl border border-ink/8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] px-2.5 sm:px-4 py-2 flex items-center justify-between gap-2 transition-all">
             
             {/* BRAND / LOGO */}
             <div
               onClick={() => setActiveTab("calc")}
-              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group select-none shrink-0"
+              className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
             >
-              <div className="size-8 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-base sm:text-lg font-[family-name:var(--font-fredoka)] font-bold shadow-md shadow-rose/25 ring-2 ring-white/50 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+              <div className="size-8 sm:size-9 rounded-xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-sm sm:text-base font-[family-name:var(--font-fredoka)] font-bold shadow-sm shadow-rose/25 group-hover:scale-105 transition-transform duration-200">
                 +
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-sm sm:text-lg text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
-                    Calculadora
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none ring-1 ring-rose/20">
-                    Plus
-                  </span>
-                </div>
-                <span className="hidden md:inline-block text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
-                  Científica, Financeira & Datas
+              <div className="hidden xs:flex items-center gap-1">
+                <span className="font-[family-name:var(--font-fredoka)] font-semibold text-sm sm:text-base text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
+                  Calculadora
+                </span>
+                <span className="text-[9px] uppercase font-black tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
+                  Plus
                 </span>
               </div>
             </div>
 
-            {/* CENTER SEGMENTED NAVIGATION TABS (5 MODES) */}
-            <div className="flex items-center bg-display/80 backdrop-blur-sm p-1 rounded-xl sm:rounded-2xl border border-ink/6 shadow-inner overflow-x-auto custom-scrollbar max-w-[50%] sm:max-w-none">
+            {/* CENTER SEGMENTED NAVIGATION TABS (NO SCROLLBAR) */}
+            <div className="flex items-center bg-display/90 p-1 rounded-xl border border-ink/6 shadow-inner no-scrollbar overflow-x-auto gap-0.5 sm:gap-1">
               <button
                 onClick={() => setActiveTab("calc")}
                 className={[
-                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
                   activeTab === "calc"
-                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
                 ].join(" ")}
                 title="Calculadora Padrão e Científica"
               >
                 <Calculator className="size-3.5 shrink-0" />
                 <span className="hidden sm:inline">Calculadora</span>
-                <span className="sm:hidden">Calc</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("finance")}
                 className={[
-                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
                   activeTab === "finance"
-                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
                 ].join(" ")}
-                title="Modo Financeiro: Juros, Financiamentos e Descontos"
+                title="Modo Financeiro: Juros, Parcelas e Descontos"
               >
                 <TrendingUp className="size-3.5 shrink-0" />
                 <span className="hidden sm:inline">Financeiro</span>
-                <span className="sm:hidden">Fin</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("dates")}
                 className={[
-                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
                   activeTab === "dates"
-                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
                 ].join(" ")}
-                title="Calculadora de Datas e Horas Trabalhadas"
+                title="Calculadora de Datas e Horas"
               >
                 <Calendar className="size-3.5 shrink-0" />
-                <span>Datas</span>
+                <span className="hidden sm:inline">Datas</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("currency")}
                 className={[
-                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
                   activeTab === "currency"
-                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
                 ].join(" ")}
-                title="Conversor de Moedas em Tempo Real"
+                title="Conversor de Moedas"
               >
                 <Coins className="size-3.5 shrink-0" />
-                <span className="hidden sm:inline">Moedas</span>
+                <span className="hidden md:inline">Moedas</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("units")}
                 className={[
-                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 select-none shrink-0",
                   activeTab === "units"
-                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
-                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/60",
                 ].join(" ")}
-                title="Conversor de Unidades e Medidas"
+                title="Conversor de Medidas"
               >
                 <Scale className="size-3.5 shrink-0" />
                 <span className="hidden md:inline">Medidas</span>
               </button>
             </div>
 
-            {/* RIGHT SIDE TOOLS & ACTIONS */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* RIGHT COMPACT ACTIONS */}
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               
               {/* History Button */}
               <button
                 onClick={() => setShowHistoryDrawer(true)}
-                className="calc-key relative h-9 px-2 sm:px-3 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
+                className="calc-key relative size-8 sm:size-9 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center justify-center cursor-pointer shadow-xs transition-all"
                 title="Histórico de Cálculos & Exportação"
+                aria-label="Abrir histórico"
               >
                 <History className="size-4 text-rose-deep shrink-0" />
-                <span className="hidden xl:inline">Histórico</span>
                 {calculationHistory.length > 0 && (
-                  <span className="size-4 bg-rose text-white text-[10px] font-bold rounded-full grid place-items-center">
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-xs">
                     {calculationHistory.length > 9 ? "9+" : calculationHistory.length}
                   </span>
                 )}
@@ -1213,16 +1206,12 @@ function Index() {
               <div className="relative" ref={themeDropdownRef}>
                 <button
                   onClick={() => setShowThemeMenu((prev) => !prev)}
-                  className="calc-key h-9 px-2 sm:px-2.5 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
-                  title="Seletor de 16 Temas Visuais"
+                  className="calc-key h-8 sm:h-9 px-2 sm:px-2.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
+                  title="Alterar Tema Visual"
                 >
-                  <span className={`size-3 rounded-full ${currentThemeObj.color} ring-1 ring-black/10 shadow-xs`} />
-                  <Palette className="size-4 text-rose-deep shrink-0" />
-                  <span className="hidden 2xl:inline capitalize truncate max-w-[90px]">{currentThemeObj.label}</span>
-                  <span className="text-[10px] bg-rose/15 text-rose-deep font-bold px-1 rounded-md hidden lg:inline">
-                    16
-                  </span>
-                  <ChevronDown className="size-3 text-ink-soft hidden sm:inline" />
+                  <span className={`size-3.5 rounded-full ${currentThemeObj.color} ring-1 ring-black/10 shadow-xs shrink-0`} />
+                  <span className="hidden lg:inline capitalize truncate max-w-[85px]">{currentThemeObj.label}</span>
+                  <ChevronDown className="size-3 text-ink-soft" />
                 </button>
 
                 {showThemeMenu && (
@@ -1272,15 +1261,15 @@ function Index() {
               {/* User Account / Login CTA */}
               <Link
                 to="/login"
-                className="calc-key h-9 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
-                title={currentUser ? `Conectado como ${currentUser.name}` : "Acessar ou Criar Conta"}
+                className="calc-key h-8 sm:h-9 px-2 sm:px-2.5 rounded-xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
+                title={currentUser ? `Conectado como ${currentUser.name}` : "Entrar / Perfil"}
               >
                 {currentUser ? (
                   <>
                     <div className="size-5 rounded-full bg-gradient-to-tr from-rose to-rose-deep text-white text-[10px] font-bold grid place-items-center shadow-xs">
                       {currentUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden md:inline truncate max-w-[70px] font-bold">
+                    <span className="hidden sm:inline truncate max-w-[65px] font-bold">
                       {currentUser.name.split(" ")[0]}
                     </span>
                   </>

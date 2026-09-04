@@ -1,5 +1,5 @@
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Calculator,
@@ -15,16 +15,8 @@ import {
   Trash2,
   ArrowRightLeft,
   Atom,
-  User,
-  Lock,
-  Mail,
-  Eye,
-  EyeOff,
   LogIn,
-  LogOut,
   Sparkles,
-  ShieldCheck,
-  CheckCircle2,
   UserCheck,
 } from "lucide-react";
 
@@ -50,7 +42,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Operator = "+" | "−" | "×" | "÷" | "^";
-type AppTab = "calc" | "currency" | "units" | "account";
+type AppTab = "calc" | "currency" | "units";
 type ThemeType = "candy" | "dark" | "sapphire" | "emerald";
 
 interface HistoryItem {
@@ -183,13 +175,6 @@ function Index() {
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
-  const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [authName, setAuthName] = useState<string>("");
-  const [authEmail, setAuthEmail] = useState<string>("");
-  const [authPassword, setAuthPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authSuccessMsg, setAuthSuccessMsg] = useState<string | null>(null);
 
   // Calculator State
   const [display, setDisplay] = useState<string>("0");
@@ -243,76 +228,6 @@ function Index() {
       // safe fallback
     }
   }, []);
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-
-    if (!authEmail.trim() || !authEmail.includes("@")) {
-      setAuthError("Por favor, informe um e-mail válido.");
-      return;
-    }
-
-    if (authPassword.length < 4) {
-      setAuthError("A senha deve ter no mínimo 4 caracteres.");
-      return;
-    }
-
-    if (isSignUp && !authName.trim()) {
-      setAuthError("Por favor, digite seu nome.");
-      return;
-    }
-
-    const userName = isSignUp
-      ? authName.trim()
-      : authName.trim() || authEmail.split("@")[0];
-
-    const newSession: UserSession = {
-      name: userName,
-      email: authEmail.trim(),
-    };
-
-    setCurrentUser(newSession);
-    try {
-      localStorage.setItem("calc_user_session", JSON.stringify(newSession));
-    } catch {
-      // safe fallback
-    }
-
-    setAuthSuccessMsg(isSignUp ? "Conta criada com sucesso!" : "Login realizado com sucesso!");
-    setTimeout(() => {
-      setAuthSuccessMsg(null);
-      setAuthEmail("");
-      setAuthPassword("");
-      setAuthName("");
-    }, 1200);
-  };
-
-  const handleQuickDemoLogin = () => {
-    const demoSession: UserSession = {
-      name: "Maxwell",
-      email: "maxwell@calculadoraplus.com",
-    };
-    setCurrentUser(demoSession);
-    try {
-      localStorage.setItem("calc_user_session", JSON.stringify(demoSession));
-    } catch {
-      // safe fallback
-    }
-    setAuthSuccessMsg("Conectado instantaneamente como Maxwell!");
-    setTimeout(() => {
-      setAuthSuccessMsg(null);
-    }, 1000);
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    try {
-      localStorage.removeItem("calc_user_session");
-    } catch {
-      // safe fallback
-    }
-  };
 
   const saveHistoryItem = useCallback((expr: string, res: string) => {
     const newItem: HistoryItem = {
@@ -727,6 +642,14 @@ function Index() {
 
             {/* Mobile Actions */}
             <div className="flex sm:hidden items-center gap-1.5">
+              <Link
+                to="/login"
+                className="px-2.5 py-1 rounded-xl bg-rose text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer shadow-sm"
+              >
+                {currentUser ? <UserCheck className="size-3" /> : <LogIn className="size-3" />}
+                <span>{currentUser ? currentUser.name.split(" ")[0] : "Entrar"}</span>
+              </Link>
+
               <button
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
                 className="size-8 rounded-xl bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink cursor-pointer"
@@ -750,7 +673,7 @@ function Index() {
             </div>
           </div>
 
-          {/* Navigation View Tabs (Includes prominent Conta / Login tab) */}
+          {/* Navigation View Tabs (Includes prominent /login link) */}
           <div className="flex items-center bg-display p-1 rounded-2xl ring-1 ring-ink/5 w-full sm:w-auto justify-center gap-1 overflow-x-auto">
             <button
               onClick={() => setActiveTab("calc")}
@@ -791,25 +714,38 @@ function Index() {
               <span>Unidades</span>
             </button>
 
-            {/* TAB: LOGIN / CONTA */}
-            <button
-              onClick={() => setActiveTab("account")}
+            {/* TAB: LINK PARA ROTA DEDICADA /login */}
+            <Link
+              to="/login"
               className={[
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
-                activeTab === "account"
-                  ? "bg-rose text-white shadow-sm ring-1 ring-white/30"
-                  : currentUser
+                currentUser
                   ? "text-rose-deep font-bold bg-mint/30 ring-1 ring-mint/40"
                   : "text-ink-soft hover:text-ink",
               ].join(" ")}
             >
               {currentUser ? <UserCheck className="size-3.5" /> : <LogIn className="size-3.5" />}
-              <span>{currentUser ? currentUser.name.split(" ")[0] : "Entrar"}</span>
-            </button>
+              <span>{currentUser ? currentUser.name.split(" ")[0] : "Login"}</span>
+            </Link>
           </div>
 
           {/* Quick Actions (Desktop) */}
           <div className="hidden sm:flex items-center gap-2">
+            {/* Direct /login Link button */}
+            <Link
+              to="/login"
+              className={[
+                "calc-key flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all",
+                currentUser
+                  ? "bg-mint/40 ring-1 ring-mint text-ink hover:bg-mint/60"
+                  : "bg-rose text-white ring-1 ring-white/30 hover:bg-rose-deep shadow-sm",
+              ].join(" ")}
+              title={currentUser ? "Ver perfil" : "Entrar ou cadastrar"}
+            >
+              {currentUser ? <UserCheck className="size-3.5" /> : <LogIn className="size-3.5" />}
+              <span>{currentUser ? currentUser.name : "Entrar / Cadastro"}</span>
+            </Link>
+
             {/* History Button */}
             <button
               onClick={() => setShowHistoryDrawer(true)}
@@ -898,13 +834,13 @@ function Index() {
                   <span className="size-2 rounded-full bg-rose animate-ping" />
                   <span className="text-xs text-ink-soft font-medium">Modo visitante</span>
                 </div>
-                <button
-                  onClick={() => setActiveTab("account")}
+                <Link
+                  to="/login"
                   className="calc-key text-xs font-semibold px-2.5 py-1 rounded-xl bg-rose text-white hover:bg-rose-deep flex items-center gap-1 cursor-pointer shadow-sm"
                 >
                   <LogIn className="size-3" />
                   <span>Fazer Login</span>
-                </button>
+                </Link>
               </div>
             ) : (
               <div className="w-full max-w-[360px] mb-3 px-3 py-1.5 rounded-2xl bg-mint/30 ring-1 ring-mint/50 flex items-center justify-between shadow-sm animate-in fade-in">
@@ -914,12 +850,12 @@ function Index() {
                     Olá, <strong className="text-rose-deep">{currentUser.name}</strong>!
                   </span>
                 </div>
-                <button
-                  onClick={() => setActiveTab("account")}
+                <Link
+                  to="/login"
                   className="text-[11px] font-bold text-rose-deep underline cursor-pointer hover:opacity-80"
                 >
                   Ver Perfil
-                </button>
+                </Link>
               </div>
             )}
 
@@ -1288,224 +1224,6 @@ function Index() {
                 </p>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* VIEW 4: DEDICATED LOGIN & PROFILE SCREEN */}
-        {activeTab === "account" && (
-          <div className="calc-fade-up w-full max-w-[420px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-6 sm:p-7 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
-            {currentUser ? (
-              /* User Profile Logged-in View */
-              <div className="space-y-5">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-2xl bg-mint/40 text-ink grid place-items-center">
-                    <ShieldCheck className="size-5 text-rose-deep" />
-                  </div>
-                  <div>
-                    <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink leading-tight">
-                      Meu Perfil
-                    </h2>
-                    <p className="text-xs text-ink-soft">Gerencie sua sessão na Calculadora Plus</p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-5 flex items-center gap-4 shadow-inner">
-                  <div className="size-14 rounded-2xl bg-rose text-white text-2xl font-bold grid place-items-center ring-2 ring-white/50 shadow-sm">
-                    {currentUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink truncate">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-xs text-ink-soft truncate font-medium">{currentUser.email}</p>
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-mint uppercase tracking-wider mt-1.5">
-                      <span className="size-2 rounded-full bg-mint" />
-                      Conta Ativa & Sincronizada
-                    </span>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-display/60 ring-1 ring-ink/5 p-4 text-xs text-ink-soft space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span>Cálculos registrados:</span>
-                    <span className="font-bold text-ink">{calculationHistory.length} operações</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Tema visual ativo:</span>
-                    <span className="font-bold text-ink capitalize">{theme}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Status da sessão:</span>
-                    <span className="font-bold text-emerald-600">Salvo localmente</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2">
-                  <button
-                    onClick={() => setActiveTab("calc")}
-                    className="calc-key w-full py-3 rounded-2xl bg-rose text-white font-[family-name:var(--font-fredoka)] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:bg-rose-deep"
-                  >
-                    <Calculator className="size-4" />
-                    <span>Ir para a Calculadora</span>
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="calc-key w-full py-2.5 rounded-2xl bg-rose/15 text-rose-deep hover:bg-rose hover:text-white font-[family-name:var(--font-fredoka)] font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                  >
-                    <LogOut className="size-3.5" />
-                    <span>Desconectar da Conta</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* User Login & Register Form View */
-              <div>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="size-10 rounded-2xl bg-rose/15 text-rose-deep grid place-items-center">
-                    <User className="size-5" />
-                  </div>
-                  <div>
-                    <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink leading-tight">
-                      {isSignUp ? "Criar Nova Conta" : "Acessar sua Conta"}
-                    </h2>
-                    <p className="text-xs text-ink-soft">
-                      {isSignUp
-                        ? "Cadastre-se para salvar seus cálculos"
-                        : "Entre para sincronizar suas preferências"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tab Switcher: Entrar vs Cadastrar */}
-                <div className="flex bg-display p-1 rounded-2xl ring-1 ring-ink/5 mb-5 shadow-inner">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp(false);
-                      setAuthError(null);
-                    }}
-                    className={[
-                      "flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer",
-                      !isSignUp ? "bg-rose text-white shadow-sm ring-1 ring-white/30" : "text-ink-soft",
-                    ].join(" ")}
-                  >
-                    Já tenho conta (Entrar)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp(true);
-                      setAuthError(null);
-                    }}
-                    className={[
-                      "flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer",
-                      isSignUp ? "bg-rose text-white shadow-sm ring-1 ring-white/30" : "text-ink-soft",
-                    ].join(" ")}
-                  >
-                    Criar conta
-                  </button>
-                </div>
-
-                {/* Success alert message */}
-                {authSuccessMsg && (
-                  <div className="mb-4 p-3 rounded-2xl bg-mint/30 ring-1 ring-mint text-ink text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-                    <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-                    <span>{authSuccessMsg}</span>
-                  </div>
-                )}
-
-                {/* Error alert message */}
-                {authError && (
-                  <div className="mb-4 p-3 rounded-2xl bg-rose/15 ring-1 ring-rose-deep text-rose-deep text-xs font-semibold animate-in fade-in">
-                    {authError}
-                  </div>
-                )}
-
-                {/* Interactive Login Form */}
-                <form onSubmit={handleLoginSubmit} className="space-y-3.5">
-                  {isSignUp && (
-                    <div>
-                      <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
-                        Seu Nome
-                      </label>
-                      <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
-                        <User className="size-4 text-ink-soft" />
-                        <input
-                          type="text"
-                          value={authName}
-                          onChange={(e) => setAuthName(e.target.value)}
-                          placeholder="Digite seu nome completo"
-                          className="w-full bg-transparent text-sm text-ink outline-none font-medium"
-                          required={isSignUp}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
-                      E-mail
-                    </label>
-                    <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
-                      <Mail className="size-4 text-ink-soft" />
-                      <input
-                        type="email"
-                        value={authEmail}
-                        onChange={(e) => setAuthEmail(e.target.value)}
-                        placeholder="exemplo@calculadoraplus.com"
-                        className="w-full bg-transparent text-sm text-ink outline-none font-medium"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
-                      Senha
-                    </label>
-                    <div className="rounded-2xl bg-display ring-1 ring-ink/5 px-3.5 py-3 flex items-center gap-2.5 shadow-inner focus-within:ring-rose/50">
-                      <Lock className="size-4 text-ink-soft" />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-transparent text-sm text-ink outline-none font-medium"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-ink-soft hover:text-ink cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="calc-key w-full mt-2 py-3.5 rounded-2xl bg-rose text-white font-[family-name:var(--font-fredoka)] font-semibold text-sm shadow-md ring-1 ring-white/30 flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-deep active:scale-95 transition-all"
-                  >
-                    <LogIn className="size-4" />
-                    <span>{isSignUp ? "Concluir Cadastro Grátis" : "Entrar na Calculadora"}</span>
-                  </button>
-                </form>
-
-                {/* Quick 1-Click Demo Login button */}
-                <div className="mt-5 pt-4 border-t border-ink/10 text-center">
-                  <p className="text-[11px] text-ink-soft mb-2.5">Acesso rápido para testes:</p>
-                  <button
-                    onClick={handleQuickDemoLogin}
-                    className="calc-key w-full py-2.5 rounded-2xl bg-display hover:bg-white ring-1 ring-ink/5 text-xs font-semibold text-ink flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Sparkles className="size-4 text-rose-deep" />
-                    <span>Entrar como Maxwell (1 Clique)</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>

@@ -17,6 +17,7 @@ import {
   LogIn,
   Sparkles,
   ChevronDown,
+  ArrowRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -888,35 +889,70 @@ function Index() {
         {/* VIEW 1: CALCULATOR (Standard & Scientific) */}
         {activeTab === "calc" && (
           <div className="flex flex-col items-center w-full">
-            {/* Quick Login Bar above Calculator if user is guest */}
+            {/* User status card / Welcome banner above Calculator */}
             {!currentUser ? (
-              <div className="w-full max-w-[360px] mb-3 px-3 py-2 rounded-2xl bg-sand/70 ring-1 ring-ink/5 flex items-center justify-between shadow-sm animate-in fade-in">
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-rose animate-ping" />
-                  <span className="text-xs text-ink-soft font-medium">Modo visitante</span>
+              <div
+                className={[
+                  "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/80 dark:bg-sand/60 backdrop-blur-md border border-ink/8 flex items-center justify-between shadow-xs transition-all duration-300 animate-in fade-in",
+                  scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+                ].join(" ")}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="size-7 rounded-xl bg-rose/15 text-rose-deep grid place-items-center shrink-0">
+                    <Sparkles className="size-3.5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-ink leading-tight">Modo Visitante</span>
+                    <span className="text-[10px] text-ink-soft leading-tight">Faça login para salvar preferências</span>
+                  </div>
                 </div>
                 <Link
                   to="/login"
-                  className="calc-key text-xs font-semibold px-2.5 py-1 rounded-xl bg-rose text-white hover:bg-rose-deep flex items-center gap-1 cursor-pointer shadow-sm"
+                  className="calc-key text-xs font-semibold px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose to-rose-deep text-white hover:brightness-105 flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
                 >
                   <LogIn className="size-3" />
-                  <span>Fazer Login</span>
+                  <span>Entrar</span>
                 </Link>
               </div>
             ) : (
-              <div className="w-full max-w-[360px] mb-3 px-3 py-1.5 rounded-2xl bg-mint/30 ring-1 ring-mint/50 flex items-center justify-between shadow-sm animate-in fade-in">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-rose-deep" />
-                  <span className="text-xs font-semibold text-ink">
-                    Olá, <strong className="text-rose-deep">{currentUser.name}</strong>!
-                  </span>
+              <div
+                className={[
+                  "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/90 dark:bg-sand/70 backdrop-blur-md border border-rose/25 shadow-xs flex items-center justify-between gap-2.5 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
+                  scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+                ].join(" ")}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative shrink-0">
+                    <div className="size-8 rounded-xl bg-gradient-to-tr from-rose to-rose-deep text-white text-xs font-bold grid place-items-center shadow-xs ring-2 ring-white/60">
+                      {currentUser.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-emerald-500 rounded-full ring-2 ring-sand" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs font-medium text-ink-soft">Olá,</span>
+                      <span className="text-xs font-bold text-ink truncate font-[family-name:var(--font-fredoka)]">
+                        {currentUser.name.split(" ")[0]}
+                      </span>
+                      <span className="text-xs">👋</span>
+                    </div>
+                    <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 leading-tight">
+                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+                      Conta sincronizada
+                    </span>
+                  </div>
                 </div>
-                <Link
-                  to="/login"
-                  className="text-[11px] font-bold text-rose-deep underline cursor-pointer hover:opacity-80"
-                >
-                  Ver Perfil
-                </Link>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Link
+                    to="/login"
+                    className="calc-key px-3 py-1.5 rounded-xl bg-display hover:bg-white text-ink border border-ink/8 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                    title="Gerenciar Conta"
+                  >
+                    <span>Perfil</span>
+                    <ArrowRight className="size-3 text-rose-deep" />
+                  </Link>
+                </div>
               </div>
             )}
 

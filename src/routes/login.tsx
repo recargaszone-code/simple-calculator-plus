@@ -1,4 +1,3 @@
-
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -135,39 +134,41 @@ function LoginRoute() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink transition-colors duration-300">
+    <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink transition-colors duration-300 antialiased">
       {/* Top Navbar */}
-      <header className="w-full max-w-4xl mx-auto px-4 pt-4 sm:pt-6 z-20 calc-fade-up">
-        <nav className="w-full rounded-3xl bg-sand/90 backdrop-blur-md ring-1 ring-ink/5 px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_10px_35px_rgb(0,0,0,0.05)]">
-          {/* Logo Brand / Back */}
-          <Link to="/" className="flex items-center gap-2.5 cursor-pointer group">
-            <div className="size-9 rounded-2xl bg-rose grid place-items-center text-white text-base font-[family-name:var(--font-fredoka)] font-bold ring-1 ring-white/40 shadow-sm group-hover:scale-105 transition-transform">
-              +
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink leading-none">
-                  Calculadora
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider bg-rose/20 text-rose-deep px-1.5 py-0.5 rounded-md leading-none">
-                  Plus
+      <header className="sticky top-0 z-40 w-full pt-3 sm:pt-5 px-3 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <nav className="w-full rounded-2xl sm:rounded-3xl bg-sand/85 dark:bg-sand/75 backdrop-blur-xl border border-ink/8 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)] px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3">
+            {/* Logo Brand / Back */}
+            <Link to="/" className="flex items-center gap-2.5 cursor-pointer group select-none">
+              <div className="size-9 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-lg font-[family-name:var(--font-fredoka)] font-bold shadow-md shadow-rose/25 ring-2 ring-white/50 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+                +
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-base sm:text-lg text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
+                    Calculadora
+                  </span>
+                  <span className="text-[10px] uppercase font-extrabold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none ring-1 ring-rose/20">
+                    Plus
+                  </span>
+                </div>
+                <span className="text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
+                  Rápida & Inteligente
                 </span>
               </div>
-              <p className="text-[10px] font-medium text-ink-soft leading-none mt-1">
-                Rápida & Inteligente
-              </p>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Navigation link to Home Calculator */}
-          <Link
-            to="/"
-            className="calc-key flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-display ring-1 ring-ink/5 text-ink hover:bg-white text-xs font-semibold cursor-pointer shadow-sm transition-all"
-          >
-            <ArrowLeft className="size-3.5 text-rose-deep" />
-            <span>Voltar à Calculadora</span>
-          </Link>
-        </nav>
+            {/* Navigation link to Home Calculator */}
+            <Link
+              to="/"
+              className="calc-key flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 text-xs sm:text-sm font-semibold cursor-pointer shadow-xs transition-all"
+            >
+              <ArrowLeft className="size-3.5 text-rose-deep" />
+              <span>Voltar à Calculadora</span>
+            </Link>
+          </nav>
+        </div>
       </header>
 
       {/* Main Form Center Box */}
@@ -392,4 +393,3 @@ function LoginRoute() {
     </div>
   );
 }
-  

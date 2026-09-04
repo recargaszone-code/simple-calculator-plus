@@ -1,31 +1,32 @@
+
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sunny Calculator — Simple & Sweet" },
+      { title: "Calculadora Plus — Rápida & Precisa" },
       {
         name: "description",
         content:
-          "A simple, beautiful calculator for everyday arithmetic. Add, subtract, multiply, and divide with a soft, tactile interface.",
+          "Uma calculadora simples, moderna e bonita para o seu dia a dia. Some, subtraia, multiplique e divida com facilidade.",
       },
-      { property: "og:title", content: "Sunny Calculator — Simple & Sweet" },
+      { property: "og:title", content: "Calculadora Plus — Rápida & Precisa" },
       {
         property: "og:description",
         content:
-          "A simple, beautiful calculator for everyday arithmetic. Add, subtract, multiply, and divide with a soft, tactile interface.",
+          "Uma calculadora simples, moderna e bonita para o seu dia a dia. Some, subtraia, multiplique e divida com facilidade.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "Sunny Calculator — Simple & Sweet",
+        content: "Calculadora Plus — Rápida & Precisa",
       },
       {
         name: "twitter:description",
         content:
-          "A simple, beautiful calculator for everyday arithmetic. Add, subtract, multiply, and divide with a soft, tactile interface.",
+          "Uma calculadora simples, moderna e bonita para o seu dia a dia. Some, subtraia, multiplique e divida com facilidade.",
       },
     ],
   }),
@@ -267,10 +268,10 @@ function Index() {
         </div>
         <div className="leading-none">
           <p className="text-lg font-[family-name:var(--font-fredoka)] font-semibold tracking-tight text-ink">
-            Sunny
+            Calculadora
           </p>
           <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-ink-soft mt-0.5">
-            calculator
+            Plus
           </p>
         </div>
       </div>
@@ -297,7 +298,7 @@ function Index() {
           <div className="w-full flex items-center justify-end gap-1.5 mt-2">
             <span className="size-1.5 rounded-full bg-rose"></span>
             <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-ink-soft">
-              ready
+              pronto
             </span>
           </div>
         </div>
@@ -376,3 +377,4 @@ function Index() {
     </div>
   );
 }
+  

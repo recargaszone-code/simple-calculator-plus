@@ -1,4 +1,3 @@
-
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -6,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition with multi-theme support.
+ * Design system definition with 16 multi-theme support.
  */
 
 @theme inline {
@@ -55,22 +54,25 @@
   --font-quicksand: "Quicksand", system-ui, sans-serif;
 }
 
+/* ========================================================
+   16 TEMAS VISUAIS COMPLETOS
+   ======================================================== */
+
+/* 1. CANDY PASTEL (Padrão) */
 :root,
 [data-theme="candy"] {
   --radius: 0.625rem;
-
-  /* Theme 1: Soft Candy Tactile (Padrão) */
-  --cream: oklch(0.977 0.011 63.22);
-  --sand: oklch(0.934 0.021 67.51);
-  --ink: oklch(0.359 0.040 300.29);
-  --ink-soft: oklch(0.627 0.032 302.71);
-  --rose: oklch(0.750 0.119 7.69);
-  --rose-deep: oklch(0.672 0.149 8.10);
-  --butter: oklch(0.859 0.104 79.36);
-  --mint: oklch(0.805 0.080 162.58);
-  --sky: oklch(0.782 0.069 238.84);
-  --lilac: oklch(0.806 0.069 300.07);
-  --display: oklch(0.995 0.003 67.39);
+  --cream: #fff8f6;
+  --sand: #fcece8;
+  --ink: #432832;
+  --ink-soft: #85616e;
+  --rose: #f29f9f;
+  --rose-deep: #e57d7d;
+  --butter: #fde68a;
+  --mint: #a7f3d0;
+  --sky: #bae6fd;
+  --lilac: #e9d5ff;
+  --display: #ffffff;
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -79,7 +81,7 @@
   --popover: var(--sand);
   --popover-foreground: var(--ink);
   --primary: var(--rose);
-  --primary-foreground: oklch(0.995 0.003 67.39);
+  --primary-foreground: #ffffff;
   --secondary: var(--display);
   --secondary-foreground: var(--ink);
   --muted: var(--sand);
@@ -87,26 +89,26 @@
   --accent: var(--mint);
   --accent-foreground: var(--ink);
   --destructive: var(--rose-deep);
-  --destructive-foreground: oklch(0.995 0.003 67.39);
-  --border: oklch(0.359 0.040 300.29 / 8%);
-  --input: oklch(0.359 0.040 300.29 / 10%);
+  --destructive-foreground: #ffffff;
+  --border: rgba(67, 40, 50, 0.08);
+  --input: rgba(67, 40, 50, 0.1);
   --ring: var(--rose);
 }
 
-/* Theme 2: Dark Velvet / Neon */
+/* 2. DARK VELVET */
 [data-theme="dark"],
 .dark {
-  --cream: oklch(0.180 0.025 270.0);
-  --sand: oklch(0.245 0.030 270.0);
-  --ink: oklch(0.960 0.015 270.0);
-  --ink-soft: oklch(0.720 0.035 270.0);
-  --rose: oklch(0.640 0.180 325.0);
-  --rose-deep: oklch(0.550 0.200 325.0);
-  --butter: oklch(0.750 0.120 80.0);
-  --mint: oklch(0.760 0.140 165.0);
-  --sky: oklch(0.720 0.120 240.0);
-  --lilac: oklch(0.700 0.100 300.0);
-  --display: oklch(0.290 0.030 270.0);
+  --cream: #13111c;
+  --sand: #1f1c2e;
+  --ink: #f5f3ff;
+  --ink-soft: #a7a1c4;
+  --rose: #a855f7;
+  --rose-deep: #9333ea;
+  --butter: #fef08a;
+  --mint: #34d399;
+  --sky: #38bdf8;
+  --lilac: #c084fc;
+  --display: #29253d;
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -115,7 +117,7 @@
   --popover: var(--sand);
   --popover-foreground: var(--ink);
   --primary: var(--rose);
-  --primary-foreground: oklch(0.995 0.003 67.39);
+  --primary-foreground: #ffffff;
   --secondary: var(--display);
   --secondary-foreground: var(--ink);
   --muted: var(--sand);
@@ -123,25 +125,25 @@
   --accent: var(--mint);
   --accent-foreground: var(--ink);
   --destructive: var(--rose-deep);
-  --destructive-foreground: oklch(0.995 0.003 67.39);
-  --border: oklch(0.960 0.015 270.0 / 12%);
-  --input: oklch(0.960 0.015 270.0 / 15%);
+  --destructive-foreground: #ffffff;
+  --border: rgba(245, 243, 255, 0.12);
+  --input: rgba(245, 243, 255, 0.15);
   --ring: var(--rose);
 }
 
-/* Theme 3: Ocean Sapphire */
+/* 3. AZUL SAFIRA */
 [data-theme="sapphire"] {
-  --cream: oklch(0.965 0.025 240.0);
-  --sand: oklch(0.910 0.045 240.0);
-  --ink: oklch(0.260 0.070 250.0);
-  --ink-soft: oklch(0.530 0.055 245.0);
-  --rose: oklch(0.580 0.190 248.0);
-  --rose-deep: oklch(0.480 0.210 248.0);
-  --butter: oklch(0.850 0.110 85.0);
-  --mint: oklch(0.760 0.140 205.0);
-  --sky: oklch(0.720 0.140 235.0);
-  --lilac: oklch(0.760 0.090 290.0);
-  --display: oklch(0.995 0.010 240.0);
+  --cream: #f0f7ff;
+  --sand: #e0effe;
+  --ink: #0c2d48;
+  --ink-soft: #2e5984;
+  --rose: #2563eb;
+  --rose-deep: #1d4ed8;
+  --butter: #fef08a;
+  --mint: #38bdf8;
+  --sky: #60a5fa;
+  --lilac: #c7d2fe;
+  --display: #ffffff;
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -150,7 +152,7 @@
   --popover: var(--sand);
   --popover-foreground: var(--ink);
   --primary: var(--rose);
-  --primary-foreground: oklch(0.995 0.003 67.39);
+  --primary-foreground: #ffffff;
   --secondary: var(--display);
   --secondary-foreground: var(--ink);
   --muted: var(--sand);
@@ -158,25 +160,25 @@
   --accent: var(--mint);
   --accent-foreground: var(--ink);
   --destructive: var(--rose-deep);
-  --destructive-foreground: oklch(0.995 0.003 67.39);
-  --border: oklch(0.260 0.070 250.0 / 10%);
-  --input: oklch(0.260 0.070 250.0 / 12%);
+  --destructive-foreground: #ffffff;
+  --border: rgba(12, 45, 72, 0.08);
+  --input: rgba(12, 45, 72, 0.1);
   --ring: var(--rose);
 }
 
-/* Theme 4: Emerald Zen */
+/* 4. ESMERALDA ZEN */
 [data-theme="emerald"] {
-  --cream: oklch(0.970 0.020 150.0);
-  --sand: oklch(0.915 0.040 150.0);
-  --ink: oklch(0.270 0.060 155.0);
-  --ink-soft: oklch(0.540 0.050 150.0);
-  --rose: oklch(0.600 0.150 155.0);
-  --rose-deep: oklch(0.500 0.170 155.0);
-  --butter: oklch(0.860 0.110 80.0);
-  --mint: oklch(0.780 0.130 130.0);
-  --sky: oklch(0.750 0.080 190.0);
-  --lilac: oklch(0.780 0.070 110.0);
-  --display: oklch(0.995 0.008 150.0);
+  --cream: #f0fdf4;
+  --sand: #dcfce7;
+  --ink: #064e3b;
+  --ink-soft: #047857;
+  --rose: #059669;
+  --rose-deep: #047857;
+  --butter: #fef08a;
+  --mint: #34d399;
+  --sky: #6ee7b7;
+  --lilac: #a7f3d0;
+  --display: #ffffff;
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -185,7 +187,7 @@
   --popover: var(--sand);
   --popover-foreground: var(--ink);
   --primary: var(--rose);
-  --primary-foreground: oklch(0.995 0.003 67.39);
+  --primary-foreground: #ffffff;
   --secondary: var(--display);
   --secondary-foreground: var(--ink);
   --muted: var(--sand);
@@ -193,9 +195,429 @@
   --accent: var(--mint);
   --accent-foreground: var(--ink);
   --destructive: var(--rose-deep);
-  --destructive-foreground: oklch(0.995 0.003 67.39);
-  --border: oklch(0.270 0.060 155.0 / 10%);
-  --input: oklch(0.270 0.060 155.0 / 12%);
+  --destructive-foreground: #ffffff;
+  --border: rgba(6, 78, 59, 0.08);
+  --input: rgba(6, 78, 59, 0.1);
+  --ring: var(--rose);
+}
+
+/* 5. PÔR DO SOL (SUNSET) */
+[data-theme="sunset"] {
+  --cream: #fff7ed;
+  --sand: #ffedd5;
+  --ink: #431407;
+  --ink-soft: #9a3412;
+  --rose: #ea580c;
+  --rose-deep: #c2410c;
+  --butter: #fde047;
+  --mint: #fdba74;
+  --sky: #38bdf8;
+  --lilac: #f472b6;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(67, 20, 7, 0.08);
+  --input: rgba(67, 20, 7, 0.1);
+  --ring: var(--rose);
+}
+
+/* 6. LAVANDA DREAM */
+[data-theme="lavender"] {
+  --cream: #faf5ff;
+  --sand: #f3e8ff;
+  --ink: #3b0764;
+  --ink-soft: #7e22ce;
+  --rose: #9333ea;
+  --rose-deep: #7e22ce;
+  --butter: #fef08a;
+  --mint: #d8b4fe;
+  --sky: #818cf8;
+  --lilac: #e9d5ff;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(59, 7, 100, 0.08);
+  --input: rgba(59, 7, 100, 0.1);
+  --ring: var(--rose);
+}
+
+/* 7. CYBERPUNK NEON */
+[data-theme="cyberpunk"] {
+  --cream: #090a0f;
+  --sand: #121524;
+  --ink: #f8fafc;
+  --ink-soft: #94a3b8;
+  --rose: #eab308;
+  --rose-deep: #ca8a04;
+  --butter: #facc15;
+  --mint: #06b6d4;
+  --sky: #38bdf8;
+  --lilac: #f43f5e;
+  --display: #1a1e36;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #090a0f;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: #090a0f;
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #090a0f;
+  --border: rgba(248, 250, 252, 0.12);
+  --input: rgba(248, 250, 252, 0.15);
+  --ring: var(--rose);
+}
+
+/* 8. NÓRDICO MINIMAL */
+[data-theme="nordic"] {
+  --cream: #f8fafc;
+  --sand: #e2e8f0;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --rose: #334155;
+  --rose-deep: #1e293b;
+  --butter: #cbd5e1;
+  --mint: #94a3b8;
+  --sky: #0284c7;
+  --lilac: #e2e8f0;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(15, 23, 42, 0.08);
+  --input: rgba(15, 23, 42, 0.1);
+  --ring: var(--rose);
+}
+
+/* 9. MEIA-NOITE OLED */
+[data-theme="midnight"] {
+  --cream: #030712;
+  --sand: #111827;
+  --ink: #f9fafb;
+  --ink-soft: #9ca3af;
+  --rose: #0ea5e9;
+  --rose-deep: #0284c7;
+  --butter: #38bdf8;
+  --mint: #10b981;
+  --sky: #06b6d4;
+  --lilac: #818cf8;
+  --display: #1f2937;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(249, 250, 251, 0.12);
+  --input: rgba(249, 250, 251, 0.15);
+  --ring: var(--rose);
+}
+
+/* 10. MATCHA LATTE */
+[data-theme="matcha"] {
+  --cream: #f5f7f2;
+  --sand: #e3ebd9;
+  --ink: #283618;
+  --ink-soft: #606c38;
+  --rose: #606c38;
+  --rose-deep: #283618;
+  --butter: #dda15e;
+  --mint: #a3b18a;
+  --sky: #ccd5ae;
+  --lilac: #bc6c25;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(40, 54, 24, 0.08);
+  --input: rgba(40, 54, 24, 0.1);
+  --ring: var(--rose);
+}
+
+/* 11. RUBI CARMESIM */
+[data-theme="crimson"] {
+  --cream: #190a0f;
+  --sand: #2d111b;
+  --ink: #fff1f2;
+  --ink-soft: #fda4af;
+  --rose: #e11d48;
+  --rose-deep: #be123c;
+  --butter: #fbbf24;
+  --mint: #fb7185;
+  --sky: #f43f5e;
+  --lilac: #fda4af;
+  --display: #3f1826;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 241, 242, 0.12);
+  --input: rgba(255, 241, 242, 0.15);
+  --ring: var(--rose);
+}
+
+/* 12. RETRÔ 90S */
+[data-theme="retro"] {
+  --cream: #fdf2f8;
+  --sand: #fce7f3;
+  --ink: #831843;
+  --ink-soft: #be185d;
+  --rose: #db2777;
+  --rose-deep: #be185d;
+  --butter: #fcd34d;
+  --mint: #2dd4bf;
+  --sky: #06b6d4;
+  --lilac: #c084fc;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(131, 24, 67, 0.08);
+  --input: rgba(131, 24, 67, 0.1);
+  --ring: var(--rose);
+}
+
+/* 13. OUTONO DOURADO */
+[data-theme="autumn"] {
+  --cream: #fffbeb;
+  --sand: #fef3c7;
+  --ink: #451a03;
+  --ink-soft: #b45309;
+  --rose: #d97706;
+  --rose-deep: #b45309;
+  --butter: #fbbf24;
+  --mint: #fde68a;
+  --sky: #f59e0b;
+  --lilac: #d97706;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(69, 26, 3, 0.08);
+  --input: rgba(69, 26, 3, 0.1);
+  --ring: var(--rose);
+}
+
+/* 14. GALÁXIA CÓSMICA */
+[data-theme="galaxy"] {
+  --cream: #0c0a1d;
+  --sand: #181538;
+  --ink: #f5f3ff;
+  --ink-soft: #c4b5fd;
+  --rose: #8b5cf6;
+  --rose-deep: #7c3aed;
+  --butter: #f472b6;
+  --mint: #a78bfa;
+  --sky: #38bdf8;
+  --lilac: #c084fc;
+  --display: #262152;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(245, 243, 255, 0.12);
+  --input: rgba(245, 243, 255, 0.15);
+  --ring: var(--rose);
+}
+
+/* 15. SOLAR AMISTOSO */
+[data-theme="solar"] {
+  --cream: #fefce8;
+  --sand: #fef9c3;
+  --ink: #422006;
+  --ink-soft: #854d0e;
+  --rose: #ca8a04;
+  --rose-deep: #a16207;
+  --butter: #fef08a;
+  --mint: #fde047;
+  --sky: #38bdf8;
+  --lilac: #facc15;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(66, 32, 6, 0.08);
+  --input: rgba(66, 32, 6, 0.1);
+  --ring: var(--rose);
+}
+
+/* 16. BUBBLEGUM POP */
+[data-theme="bubblegum"] {
+  --cream: #fff1f2;
+  --sand: #ffe4e6;
+  --ink: #4c0519;
+  --ink-soft: #9f1239;
+  --rose: #f43f5e;
+  --rose-deep: #e11d48;
+  --butter: #fed7aa;
+  --mint: #34d399;
+  --sky: #38bdf8;
+  --lilac: #fb7185;
+  --display: #ffffff;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--sand);
+  --card-foreground: var(--ink);
+  --popover: var(--sand);
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--display);
+  --secondary-foreground: var(--ink);
+  --muted: var(--sand);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--mint);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --destructive-foreground: #ffffff;
+  --border: rgba(76, 5, 25, 0.08);
+  --input: rgba(76, 5, 25, 0.1);
   --ring: var(--rose);
 }
 
@@ -256,7 +678,7 @@
   transform: scale(0.95);
 }
 
-/* Custom scrollbar for history drawer */
+/* Custom scrollbar for dropdowns and history drawer */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }

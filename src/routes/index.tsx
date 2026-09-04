@@ -18,22 +18,33 @@ import {
   Sparkles,
   ChevronDown,
   ArrowRight,
+  TrendingUp,
+  Calendar,
+  Download,
+  Share2,
+  FileSpreadsheet,
+  FileText,
+  Clock,
+  Percent,
+  DollarSign,
+  Users,
+  BookOpen,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Calculadora Plus — Rápida, Científica & 16 Temas" },
+      { title: "Calculadora Plus — Rápida, Científica, Financeira & 16 Temas" },
       {
         name: "description",
         content:
-          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades, 16 temas visuais e tela de login de usuário.",
+          "Calculadora completa com modos padrão e científico, financeiro, cálculo de datas, histórico com exportação CSV/WhatsApp, conversor de moedas e unidades com 16 temas visuais.",
       },
-      { property: "og:title", content: "Calculadora Plus — Rápida, Científica & 16 Temas" },
+      { property: "og:title", content: "Calculadora Plus — Rápida, Científica, Financeira & 16 Temas" },
       {
         property: "og:description",
         content:
-          "Calculadora completa com modos padrão e científico, histórico de cálculos, conversor de moedas e unidades com 16 temas visuais exclusivos.",
+          "Calculadora multifunções com modos padrão, científico, financeiro, conversor de datas, moedas e unidades com 16 temas.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -42,7 +53,9 @@ export const Route = createFileRoute("/")({
 });
 
 type Operator = "+" | "−" | "×" | "÷" | "^";
-type AppTab = "calc" | "currency" | "units";
+type AppTab = "calc" | "finance" | "dates" | "currency" | "units";
+type FinanceSubTab = "compound" | "loan" | "discount";
+type DateSubTab = "diff" | "add_sub" | "work_hours";
 
 export type ThemeType =
   | "candy"
@@ -74,6 +87,14 @@ interface UserSession {
   email: string;
 }
 
+interface ScientificConstant {
+  symbol: string;
+  name: string;
+  value: number;
+  unit: string;
+  category: "math" | "physics";
+}
+
 const MAX_DIGITS = 12;
 
 function formatNumber(value: number): string {
@@ -84,6 +105,22 @@ function formatNumber(value: number): string {
   }
   return str;
 }
+
+// Scientific & Mathematical Constants
+const SCIENTIFIC_CONSTANTS: ScientificConstant[] = [
+  { symbol: "π", name: "Pi (Arquimedes)", value: 3.141592653589793, unit: "rad", category: "math" },
+  { symbol: "e", name: "Número de Euler", value: 2.718281828459045, unit: "const", category: "math" },
+  { symbol: "Φ", name: "Proporção Áurea (Phi)", value: 1.618033988749895, unit: "ratio", category: "math" },
+  { symbol: "√2", name: "Raiz de 2 (Pitágoras)", value: 1.414213562373095, unit: "const", category: "math" },
+  { symbol: "g", name: "Gravidade Padrão Terra", value: 9.80665, unit: "m/s²", category: "physics" },
+  { symbol: "c", name: "Velocidade da Luz no Vácuo", value: 299792458, unit: "m/s", category: "physics" },
+  { symbol: "G", name: "Constante Gravitacional", value: 6.6743e-11, unit: "N·m²/kg²", category: "physics" },
+  { symbol: "h", name: "Constante de Planck", value: 6.62607015e-34, unit: "J·s", category: "physics" },
+  { symbol: "qₑ", name: "Carga Elementar do Elétron", value: 1.602176634e-19, unit: "C", category: "physics" },
+  { symbol: "R", name: "Constante Universal dos Gases", value: 8.314462618, unit: "J/(mol·K)", category: "physics" },
+  { symbol: "Nₐ", name: "Número de Avogadro", value: 6.02214076e23, unit: "mol⁻¹", category: "physics" },
+  { symbol: "k_B", name: "Constante de Boltzmann", value: 1.380649e-23, unit: "J/K", category: "physics" },
+];
 
 // Currency exchange rates (base USD)
 const EXCHANGE_RATES: Record<string, { name: string; symbol: string; rate: number }> = {
@@ -216,7 +253,7 @@ function Index() {
   // Authentication State
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
 
-  // Calculator State
+  // Calculator State & Memory
   const [display, setDisplay] = useState<string>("0");
   const [previous, setPrevious] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator | null>(null);
@@ -225,10 +262,51 @@ function Index() {
   const [popKey, setPopKey] = useState<number>(0);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
+  const [showConstantsModal, setShowConstantsModal] = useState<boolean>(false);
   const [showHistoryDrawer, setShowHistoryDrawer] = useState<boolean>(false);
   const [calculationHistory, setCalculationHistory] = useState<HistoryItem[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+  const [memoryValue, setMemoryValue] = useState<number | null>(null);
   const pressedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Financial Calculator State
+  const [financeTab, setFinanceTab] = useState<FinanceSubTab>("compound");
+  // Compound interest
+  const [initialCapital, setInitialCapital] = useState<string>("1000");
+  const [monthlyContribution, setMonthlyContribution] = useState<string>("200");
+  const [interestRate, setInterestRate] = useState<string>("10");
+  const [interestPeriodYears, setInterestPeriodYears] = useState<string>("5");
+  // Loan / Installments
+  const [loanAmount, setLoanAmount] = useState<string>("5000");
+  const [loanInstallments, setLoanInstallments] = useState<string>("12");
+  const [loanMonthlyRate, setLoanMonthlyRate] = useState<string>("2.5");
+  // Discount & Tip Split
+  const [billAmount, setBillAmount] = useState<string>("180");
+  const [discountPercent, setDiscountPercent] = useState<string>("10");
+  const [tipPercent, setTipPercent] = useState<string>("10");
+  const [splitPeople, setSplitPeople] = useState<string>("3");
+
+  // Dates & Time Calculator State
+  const [dateTab, setDateTab] = useState<DateSubTab>("diff");
+  // Date Difference
+  const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [endDate, setEndDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().split("T")[0];
+  });
+  // Add / Subtract Days
+  const [baseDate, setBaseDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [daysDelta, setDaysDelta] = useState<string>("45");
+  const [deltaMode, setDeltaMode] = useState<"add" | "sub">("add");
+  const [skipWeekends, setSkipWeekends] = useState<boolean>(false);
+  // Work Hours
+  const [workEntry, setWorkEntry] = useState<string>("08:00");
+  const [lunchOut, setLunchOut] = useState<string>("12:00");
+  const [lunchIn, setLunchIn] = useState<string>("13:00");
+  const [workExit, setWorkExit] = useState<string>("17:00");
+  const [contractHours, setContractHours] = useState<string>("8");
 
   // Currency Converter State
   const [currAmount, setCurrAmount] = useState<string>("100");
@@ -286,7 +364,7 @@ function Index() {
     }
   }, [showThemeMenu]);
 
-  // Load session & history from localStorage
+  // Load session & history & memory from localStorage
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("calc_user_session");
@@ -296,6 +374,10 @@ function Index() {
       const savedHist = localStorage.getItem("calc_history_plus");
       if (savedHist) {
         setCalculationHistory(JSON.parse(savedHist));
+      }
+      const savedMem = localStorage.getItem("calc_memory_val");
+      if (savedMem) {
+        setMemoryValue(parseFloat(savedMem));
       }
     } catch {
       // safe fallback
@@ -338,6 +420,64 @@ function Index() {
     setPressedKey(label);
     pressedTimeoutRef.current = setTimeout(() => setPressedKey(null), 120);
   }, []);
+
+  // Memory Functions (MC, MR, M+, M-, MS)
+  const memoryClear = useCallback(() => {
+    setMemoryValue(null);
+    try {
+      localStorage.removeItem("calc_memory_val");
+    } catch {
+      // safe fallback
+    }
+  }, []);
+
+  const memoryRecall = useCallback(() => {
+    if (memoryValue !== null) {
+      setDisplay(formatNumber(memoryValue));
+      setFreshResult(true);
+      triggerPop();
+    }
+  }, [memoryValue, triggerPop]);
+
+  const memoryStore = useCallback(() => {
+    const val = parseFloat(display);
+    if (!Number.isNaN(val)) {
+      setMemoryValue(val);
+      try {
+        localStorage.setItem("calc_memory_val", val.toString());
+      } catch {
+        // safe fallback
+      }
+    }
+  }, [display]);
+
+  const memoryAdd = useCallback(() => {
+    const val = parseFloat(display);
+    if (!Number.isNaN(val)) {
+      const currentMem = memoryValue || 0;
+      const updated = currentMem + val;
+      setMemoryValue(updated);
+      try {
+        localStorage.setItem("calc_memory_val", updated.toString());
+      } catch {
+        // safe fallback
+      }
+    }
+  }, [display, memoryValue]);
+
+  const memorySubtract = useCallback(() => {
+    const val = parseFloat(display);
+    if (!Number.isNaN(val)) {
+      const currentMem = memoryValue || 0;
+      const updated = currentMem - val;
+      setMemoryValue(updated);
+      try {
+        localStorage.setItem("calc_memory_val", updated.toString());
+      } catch {
+        // safe fallback
+      }
+    }
+  }, [display, memoryValue]);
 
   const clearAll = useCallback(() => {
     setDisplay("0");
@@ -407,6 +547,20 @@ function Index() {
     setFreshResult(true);
     triggerPop();
   }, [saveHistoryItem, triggerPop]);
+
+  // Insert Constant into display
+  const insertConstant = useCallback(
+    (constObj: ScientificConstant) => {
+      const formatted = formatNumber(constObj.value);
+      setDisplay(formatted);
+      setHistory(`Constante ${constObj.symbol}`);
+      saveHistoryItem(`Constante ${constObj.symbol} (${constObj.name})`, formatted);
+      setFreshResult(true);
+      setShowConstantsModal(false);
+      triggerPop();
+    },
+    [saveHistoryItem, triggerPop]
+  );
 
   // Scientific Single Value Functions
   const applyScientificFunction = useCallback(
@@ -676,6 +830,247 @@ function Index() {
     return finalVal.toLocaleString("pt-BR", { maximumFractionDigits: 6 });
   };
 
+  // ================= FINANCIAL CALCULATIONS ================= //
+  const calculateCompoundInterest = () => {
+    const p = parseFloat(initialCapital) || 0;
+    const pmt = parseFloat(monthlyContribution) || 0;
+    const rAnnual = (parseFloat(interestRate) || 0) / 100;
+    const rMonthly = rAnnual / 12;
+    const years = parseFloat(interestPeriodYears) || 0;
+    const totalMonths = Math.round(years * 12);
+
+    if (totalMonths <= 0) return { totalInvested: p, totalInterest: 0, totalAmount: p };
+
+    let totalAmount = p;
+    let totalInvested = p;
+
+    for (let i = 0; i < totalMonths; i++) {
+      totalAmount = totalAmount * (1 + rMonthly) + pmt;
+      totalInvested += pmt;
+    }
+
+    const totalInterest = Math.max(0, totalAmount - totalInvested);
+
+    return {
+      totalInvested,
+      totalInterest,
+      totalAmount,
+    };
+  };
+
+  const calculateLoan = () => {
+    const principal = parseFloat(loanAmount) || 0;
+    const n = parseInt(loanInstallments) || 1;
+    const r = (parseFloat(loanMonthlyRate) || 0) / 100;
+
+    if (n <= 0) return { monthlyPayment: 0, totalPaid: 0, totalInterest: 0 };
+    if (r === 0) {
+      const pmt = principal / n;
+      return { monthlyPayment: pmt, totalPaid: principal, totalInterest: 0 };
+    }
+
+    // Formula Price: PMT = P * [r * (1 + r)^n] / [(1 + r)^n - 1]
+    const factor = Math.pow(1 + r, n);
+    const monthlyPayment = (principal * (r * factor)) / (factor - 1);
+    const totalPaid = monthlyPayment * n;
+    const totalInterest = totalPaid - principal;
+
+    return {
+      monthlyPayment,
+      totalPaid,
+      totalInterest,
+    };
+  };
+
+  const calculateDiscountAndTip = () => {
+    const rawBill = parseFloat(billAmount) || 0;
+    const discP = (parseFloat(discountPercent) || 0) / 100;
+    const tipP = (parseFloat(tipPercent) || 0) / 100;
+    const people = Math.max(1, parseInt(splitPeople) || 1);
+
+    const discountValue = rawBill * discP;
+    const discountedTotal = Math.max(0, rawBill - discountValue);
+    const tipValue = discountedTotal * tipP;
+    const finalTotal = discountedTotal + tipValue;
+    const perPerson = finalTotal / people;
+
+    return {
+      discountValue,
+      discountedTotal,
+      tipValue,
+      finalTotal,
+      perPerson,
+    };
+  };
+
+  // ================= DATES & TIME CALCULATIONS ================= //
+  const calculateDateDiff = () => {
+    if (!startDate || !endDate) return null;
+    const start = new Date(startDate + "T00:00:00");
+    const end = new Date(endDate + "T00:00:00");
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    const isFuture = diffDays >= 0;
+    const absDays = Math.abs(diffDays);
+
+    // Calculate business days & weekends
+    let workdays = 0;
+    let weekends = 0;
+    const cur = new Date(Math.min(start.getTime(), end.getTime()));
+    const maxDate = new Date(Math.max(start.getTime(), end.getTime()));
+
+    while (cur < maxDate) {
+      cur.setDate(cur.getDate() + 1);
+      const day = cur.getDay();
+      if (day === 0 || day === 6) {
+        weekends++;
+      } else {
+        workdays++;
+      }
+    }
+
+    const weeks = (absDays / 7).toFixed(1);
+    const months = (absDays / 30.4375).toFixed(1);
+
+    return {
+      totalDays: diffDays,
+      absDays,
+      workdays,
+      weekends,
+      weeks,
+      months,
+      isFuture,
+    };
+  };
+
+  const calculateAddSubDays = () => {
+    if (!baseDate) return "";
+    const base = new Date(baseDate + "T00:00:00");
+    if (Number.isNaN(base.getTime())) return "";
+
+    const delta = parseInt(daysDelta) || 0;
+    const multiplier = deltaMode === "add" ? 1 : -1;
+
+    if (skipWeekends) {
+      let added = 0;
+      const target = new Date(base);
+      while (added < Math.abs(delta)) {
+        target.setDate(target.getDate() + multiplier);
+        const day = target.getDay();
+        if (day !== 0 && day !== 6) {
+          added++;
+        }
+      }
+      return target.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } else {
+      base.setDate(base.getDate() + delta * multiplier);
+      return base.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+  };
+
+  const calculateWorkHours = () => {
+    const parseMins = (timeStr: string) => {
+      const [h, m] = timeStr.split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    const tEntry = parseMins(workEntry);
+    const tLunchOut = parseMins(lunchOut);
+    const tLunchIn = parseMins(lunchIn);
+    const tExit = parseMins(workExit);
+
+    const morningMins = Math.max(0, tLunchOut - tEntry);
+    const afternoonMins = Math.max(0, tExit - tLunchIn);
+    const totalMins = morningMins + afternoonMins;
+
+    const contractMins = (parseFloat(contractHours) || 8) * 60;
+    const balanceMins = totalMins - contractMins;
+
+    const formatHoursMins = (mins: number) => {
+      const sign = mins < 0 ? "-" : "+";
+      const abs = Math.abs(mins);
+      const h = Math.floor(abs / 60);
+      const m = abs % 60;
+      return `${sign}${h}h ${m.toString().padStart(2, "0")}m`;
+    };
+
+    const totalHoursFormatted = `${Math.floor(totalMins / 60)}h ${(totalMins % 60).toString().padStart(2, "0")}m`;
+
+    return {
+      totalHoursFormatted,
+      balanceFormatted: formatHoursMins(balanceMins),
+      isOvertime: balanceMins >= 0,
+      balanceMins,
+    };
+  };
+
+  // ================= EXPORT & SHARE FUNCTIONS ================= //
+  const exportHistoryAsCSV = () => {
+    if (calculationHistory.length === 0) return;
+    const header = "Data/Hora,Expressão,Resultado\n";
+    const rows = calculationHistory
+      .map((item) => `"${item.timestamp}","${item.expression}","${item.result}"`)
+      .join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `calculadora_historico_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShareFeedback("CSV exportado com sucesso!");
+    setTimeout(() => setShareFeedback(null), 2500);
+  };
+
+  const exportHistoryAsTXT = () => {
+    if (calculationHistory.length === 0) return;
+    const title = "=== HISTÓRICO DE CÁLCULOS — CALCULADORA PLUS ===\n";
+    const dateStr = `Gerado em: ${new Date().toLocaleString("pt-BR")}\n\n`;
+    const rows = calculationHistory
+      .map((item, idx) => `[${idx + 1}] (${item.timestamp}) ${item.expression} = ${item.result}`)
+      .join("\n");
+    const blob = new Blob([title + dateStr + rows], { type: "text/plain;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `calculadora_historico_${new Date().toISOString().slice(0, 10)}.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShareFeedback("TXT baixado com sucesso!");
+    setTimeout(() => setShareFeedback(null), 2500);
+  };
+
+  const copyForWhatsApp = () => {
+    if (calculationHistory.length === 0) return;
+    const header = "📊 *Histórico de Cálculos — Calculadora Plus*\n\n";
+    const body = calculationHistory
+      .slice(0, 15)
+      .map((item) => `• \`${item.expression}\` = *${item.result}*`)
+      .join("\n");
+    const footer = "\n\n_Gerado via Calculadora Plus_";
+
+    if (typeof navigator !== "undefined") {
+      navigator.clipboard.writeText(header + body + footer);
+      setShareFeedback("Copiado para o WhatsApp!");
+      setTimeout(() => setShareFeedback(null), 2500);
+    }
+  };
+
   const copyToClipboard = (text: string, id: string) => {
     if (typeof navigator !== "undefined") {
       navigator.clipboard.writeText(text);
@@ -685,81 +1080,114 @@ function Index() {
   };
 
   const currentThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
+  const compoundRes = calculateCompoundInterest();
+  const loanRes = calculateLoan();
+  const discountRes = calculateDiscountAndTip();
+  const dateDiffRes = calculateDateDiff();
+  const workHoursRes = calculateWorkHours();
 
   return (
     <div className="min-h-screen w-full bg-cream flex flex-col justify-between text-ink relative transition-colors duration-300 antialiased selection:bg-rose/20">
       {/* PREMIUM MODERN REDESIGNED NAVBAR */}
-      <header className="sticky top-0 z-40 w-full pt-3 sm:pt-5 px-3 sm:px-6">
+      <header className="sticky top-0 z-40 w-full pt-3 sm:pt-4 px-3 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <nav className="w-full rounded-2xl sm:rounded-3xl bg-sand/85 dark:bg-sand/75 backdrop-blur-xl border border-ink/8 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.03)] px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 transition-all">
             
             {/* BRAND / LOGO */}
             <div
               onClick={() => setActiveTab("calc")}
-              className="flex items-center gap-2.5 cursor-pointer group select-none shrink-0"
+              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group select-none shrink-0"
             >
-              <div className="size-9 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-lg font-[family-name:var(--font-fredoka)] font-bold shadow-md shadow-rose/25 ring-2 ring-white/50 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+              <div className="size-8 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose to-rose-deep grid place-items-center text-white text-base sm:text-lg font-[family-name:var(--font-fredoka)] font-bold shadow-md shadow-rose/25 ring-2 ring-white/50 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
                 +
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-base sm:text-lg text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
+                  <span className="font-[family-name:var(--font-fredoka)] font-semibold text-sm sm:text-lg text-ink tracking-tight leading-none group-hover:text-rose-deep transition-colors">
                     Calculadora
                   </span>
-                  <span className="text-[10px] uppercase font-extrabold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none ring-1 ring-rose/20">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-extrabold tracking-wider bg-rose/15 text-rose-deep px-1.5 py-0.5 rounded-md leading-none ring-1 ring-rose/20">
                     Plus
                   </span>
                 </div>
-                <span className="hidden sm:inline-block text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
-                  16 Temas & Conversores
+                <span className="hidden md:inline-block text-[10px] font-medium text-ink-soft leading-tight mt-0.5">
+                  Científica, Financeira & Datas
                 </span>
               </div>
             </div>
 
-            {/* CENTER SEGMENTED NAVIGATION TABS */}
-            <div className="flex items-center bg-display/80 backdrop-blur-sm p-1 rounded-xl sm:rounded-2xl border border-ink/6 shadow-inner">
+            {/* CENTER SEGMENTED NAVIGATION TABS (5 MODES) */}
+            <div className="flex items-center bg-display/80 backdrop-blur-sm p-1 rounded-xl sm:rounded-2xl border border-ink/6 shadow-inner overflow-x-auto custom-scrollbar max-w-[50%] sm:max-w-none">
               <button
                 onClick={() => setActiveTab("calc")}
                 className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
                   activeTab === "calc"
                     ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
                     : "text-ink-soft hover:text-ink hover:bg-sand/50",
                 ].join(" ")}
                 title="Calculadora Padrão e Científica"
               >
-                <Calculator className="size-3.5 sm:size-4 shrink-0" />
-                <span className="hidden xs:inline">Calculadora</span>
-                <span className="xs:hidden">Calc</span>
+                <Calculator className="size-3.5 shrink-0" />
+                <span className="hidden sm:inline">Calculadora</span>
+                <span className="sm:hidden">Calc</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("finance")}
+                className={[
+                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  activeTab === "finance"
+                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                ].join(" ")}
+                title="Modo Financeiro: Juros, Financiamentos e Descontos"
+              >
+                <TrendingUp className="size-3.5 shrink-0" />
+                <span className="hidden sm:inline">Financeiro</span>
+                <span className="sm:hidden">Fin</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("dates")}
+                className={[
+                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
+                  activeTab === "dates"
+                    ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
+                    : "text-ink-soft hover:text-ink hover:bg-sand/50",
+                ].join(" ")}
+                title="Calculadora de Datas e Horas Trabalhadas"
+              >
+                <Calendar className="size-3.5 shrink-0" />
+                <span>Datas</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("currency")}
                 className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
                   activeTab === "currency"
                     ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
                     : "text-ink-soft hover:text-ink hover:bg-sand/50",
                 ].join(" ")}
                 title="Conversor de Moedas em Tempo Real"
               >
-                <Coins className="size-3.5 sm:size-4 shrink-0" />
-                <span>Moedas</span>
+                <Coins className="size-3.5 shrink-0" />
+                <span className="hidden sm:inline">Moedas</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("units")}
                 className={[
-                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all duration-200 select-none",
+                  "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 select-none shrink-0",
                   activeTab === "units"
                     ? "bg-rose text-white shadow-sm shadow-rose/30 ring-1 ring-white/30"
                     : "text-ink-soft hover:text-ink hover:bg-sand/50",
                 ].join(" ")}
                 title="Conversor de Unidades e Medidas"
               >
-                <Scale className="size-3.5 sm:size-4 shrink-0" />
-                <span className="hidden sm:inline">Unidades</span>
-                <span className="sm:hidden">Medidas</span>
+                <Scale className="size-3.5 shrink-0" />
+                <span className="hidden md:inline">Medidas</span>
               </button>
             </div>
 
@@ -770,10 +1198,10 @@ function Index() {
               <button
                 onClick={() => setShowHistoryDrawer(true)}
                 className="calc-key relative h-9 px-2 sm:px-3 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
-                title="Histórico de Cálculos"
+                title="Histórico de Cálculos & Exportação"
               >
                 <History className="size-4 text-rose-deep shrink-0" />
-                <span className="hidden md:inline">Histórico</span>
+                <span className="hidden xl:inline">Histórico</span>
                 {calculationHistory.length > 0 && (
                   <span className="size-4 bg-rose text-white text-[10px] font-bold rounded-full grid place-items-center">
                     {calculationHistory.length > 9 ? "9+" : calculationHistory.length}
@@ -790,7 +1218,7 @@ function Index() {
                 >
                   <span className={`size-3 rounded-full ${currentThemeObj.color} ring-1 ring-black/10 shadow-xs`} />
                   <Palette className="size-4 text-rose-deep shrink-0" />
-                  <span className="hidden xl:inline capitalize truncate max-w-[90px]">{currentThemeObj.label}</span>
+                  <span className="hidden 2xl:inline capitalize truncate max-w-[90px]">{currentThemeObj.label}</span>
                   <span className="text-[10px] bg-rose/15 text-rose-deep font-bold px-1 rounded-md hidden lg:inline">
                     16
                   </span>
@@ -811,7 +1239,6 @@ function Index() {
                       </span>
                     </div>
 
-                    {/* Scrollable 2-Column Grid for 16 Themes */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
                       {THEMES.map((t) => (
                         <button
@@ -842,19 +1269,10 @@ function Index() {
                 )}
               </div>
 
-              {/* Shortcuts Dialog Button (Desktop) */}
-              <button
-                onClick={() => setShowShortcuts(true)}
-                className="calc-key hidden sm:flex size-9 rounded-xl sm:rounded-2xl bg-display hover:bg-white text-ink border border-ink/8 items-center justify-center text-xs font-semibold select-none cursor-pointer shadow-xs transition-all"
-                title="Atalhos do Teclado"
-              >
-                <Keyboard className="size-4 text-rose-deep" />
-              </button>
-
               {/* User Account / Login CTA */}
               <Link
                 to="/login"
-                className="calc-key h-9 px-2.5 sm:px-3.5 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
+                className="calc-key h-9 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl flex items-center gap-1.5 text-xs font-semibold select-none cursor-pointer transition-all shadow-xs bg-rose/15 text-rose-deep border border-rose/30 hover:bg-rose/25"
                 title={currentUser ? `Conectado como ${currentUser.name}` : "Acessar ou Criar Conta"}
               >
                 {currentUser ? (
@@ -862,7 +1280,7 @@ function Index() {
                     <div className="size-5 rounded-full bg-gradient-to-tr from-rose to-rose-deep text-white text-[10px] font-bold grid place-items-center shadow-xs">
                       {currentUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden sm:inline truncate max-w-[80px] font-bold">
+                    <span className="hidden md:inline truncate max-w-[70px] font-bold">
                       {currentUser.name.split(" ")[0]}
                     </span>
                   </>
@@ -881,7 +1299,8 @@ function Index() {
 
       {/* Main Content Areas */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-8">
-        {/* VIEW 1: CALCULATOR (Standard & Scientific) */}
+        
+        {/* VIEW 1: CALCULATOR (Standard & Scientific + Memory & Constants) */}
         {activeTab === "calc" && (
           <div className="flex flex-col items-center w-full">
             {/* User status card / Welcome banner above Calculator */}
@@ -889,7 +1308,7 @@ function Index() {
               <div
                 className={[
                   "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/80 dark:bg-sand/60 backdrop-blur-md border border-ink/8 flex items-center justify-between shadow-xs transition-all duration-300 animate-in fade-in",
-                  scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+                  scientificMode ? "max-w-[450px]" : "max-w-[370px]",
                 ].join(" ")}
               >
                 <div className="flex items-center gap-2.5">
@@ -898,7 +1317,7 @@ function Index() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-ink leading-tight">Modo Visitante</span>
-                    <span className="text-[10px] text-ink-soft leading-tight">Faça login para salvar preferências</span>
+                    <span className="text-[10px] text-ink-soft leading-tight">Faça login para sincronizar contas</span>
                   </div>
                 </div>
                 <Link
@@ -913,7 +1332,7 @@ function Index() {
               <div
                 className={[
                   "w-full mb-3 px-3.5 py-2.5 rounded-2xl bg-sand/90 dark:bg-sand/70 backdrop-blur-md border border-rose/30 shadow-xs flex items-center justify-between gap-2.5 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
-                  scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+                  scientificMode ? "max-w-[450px]" : "max-w-[370px]",
                 ].join(" ")}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -954,37 +1373,109 @@ function Index() {
             <div
               className={[
                 "calc-fade-up w-full rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-4 sm:p-5 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)] transition-all duration-300",
-                scientificMode ? "max-w-[440px]" : "max-w-[360px]",
+                scientificMode ? "max-w-[450px]" : "max-w-[370px]",
               ].join(" ")}
             >
-              {/* Scientific Toggle & Display Header */}
+              {/* Scientific Toggle & Tools Header */}
               <div className="flex items-center justify-between mb-2.5 px-1">
-                <button
-                  onClick={() => setScientificMode(!scientificMode)}
-                  className={[
-                    "calc-key flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold ring-1 ring-ink/5 cursor-pointer select-none",
-                    scientificMode
-                      ? "bg-rose text-white ring-white/30"
-                      : "bg-display text-ink hover:bg-white",
-                  ].join(" ")}
-                  title="Alternar modo científico"
-                >
-                  <Atom className="size-3.5" />
-                  <span>Científica</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setScientificMode(!scientificMode)}
+                    className={[
+                      "calc-key flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold ring-1 ring-ink/5 cursor-pointer select-none",
+                      scientificMode
+                        ? "bg-rose text-white ring-white/30"
+                        : "bg-display text-ink hover:bg-white",
+                    ].join(" ")}
+                    title="Alternar modo científico"
+                  >
+                    <Atom className="size-3.5" />
+                    <span>Científica</span>
+                  </button>
 
+                  <button
+                    onClick={() => setShowConstantsModal(true)}
+                    className="calc-key flex items-center gap-1 px-2 py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-xs font-medium ring-1 ring-ink/5 cursor-pointer"
+                    title="Biblioteca de Constantes Físicas & Matemáticas"
+                  >
+                    <BookOpen className="size-3 text-rose-deep" />
+                    <span>Constantes</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowShortcuts(true)}
+                    className="calc-key hidden sm:flex size-7 rounded-xl bg-display ring-1 ring-ink/5 items-center justify-center text-ink-soft hover:text-ink text-xs cursor-pointer"
+                    title="Atalhos do Teclado"
+                  >
+                    <Keyboard className="size-3.5" />
+                  </button>
+
+                  <button
+                    onClick={clearAll}
+                    className="calc-key flex items-center gap-1 px-2.5 py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-xs font-medium ring-1 ring-ink/5 cursor-pointer"
+                    title="Limpar visor"
+                  >
+                    <RotateCcw className="size-3" />
+                    <span>Limpar</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Memory Keys Row (MC, MR, M+, M-, MS) */}
+              <div className="grid grid-cols-5 gap-1.5 mb-2.5">
                 <button
-                  onClick={clearAll}
-                  className="calc-key flex items-center gap-1 px-2.5 py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-xs font-medium ring-1 ring-ink/5 cursor-pointer"
-                  title="Limpar visor"
+                  onClick={memoryClear}
+                  className="calc-key py-1 rounded-xl bg-display text-ink-soft hover:text-rose-deep text-[11px] font-bold ring-1 ring-ink/5 cursor-pointer"
+                  title="Memory Clear (Limpar Memória)"
                 >
-                  <RotateCcw className="size-3" />
-                  <span>Limpar</span>
+                  MC
+                </button>
+                <button
+                  onClick={memoryRecall}
+                  className={[
+                    "calc-key py-1 rounded-xl text-[11px] font-bold ring-1 cursor-pointer",
+                    memoryValue !== null
+                      ? "bg-rose/20 text-rose-deep ring-rose/30 font-extrabold"
+                      : "bg-display text-ink-soft/60 ring-ink/5",
+                  ].join(" ")}
+                  title="Memory Recall (Recuperar Memória)"
+                >
+                  MR
+                </button>
+                <button
+                  onClick={memoryAdd}
+                  className="calc-key py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-[11px] font-bold ring-1 ring-ink/5 cursor-pointer"
+                  title="Memory Add (Adicionar à Memória)"
+                >
+                  M+
+                </button>
+                <button
+                  onClick={memorySubtract}
+                  className="calc-key py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-[11px] font-bold ring-1 ring-ink/5 cursor-pointer"
+                  title="Memory Subtract (Subtrair da Memória)"
+                >
+                  M−
+                </button>
+                <button
+                  onClick={memoryStore}
+                  className="calc-key py-1 rounded-xl bg-display text-ink-soft hover:text-ink text-[11px] font-bold ring-1 ring-ink/5 cursor-pointer"
+                  title="Memory Store (Gravar Valor na Memória)"
+                >
+                  MS
                 </button>
               </div>
 
               {/* Display Box */}
-              <div className="rounded-[min(4vw,22px)] bg-display ring-1 ring-ink/5 px-5 pt-4 pb-4 h-[142px] flex flex-col items-end justify-end overflow-hidden shadow-inner">
+              <div className="rounded-[min(4vw,22px)] bg-display ring-1 ring-ink/5 px-5 pt-3.5 pb-3.5 h-[142px] flex flex-col items-end justify-end overflow-hidden shadow-inner relative">
+                {/* Memory Active Badge */}
+                {memoryValue !== null && (
+                  <span className="absolute top-3 left-4 text-[10px] font-extrabold tracking-wider bg-rose/20 text-rose-deep px-1.5 py-0.5 rounded-md border border-rose/30">
+                    M: {formatNumber(memoryValue)}
+                  </span>
+                )}
+
                 {/* History preview */}
                 <div className="w-full flex items-center justify-end gap-2 h-6 text-ink-soft">
                   <span className="text-base sm:text-lg font-medium font-[family-name:var(--font-quicksand)] truncate">
@@ -995,7 +1486,7 @@ function Index() {
                 <div className="w-full text-right mt-1">
                   <span
                     key={popKey}
-                    className="calc-pop inline-block text-[44px] sm:text-[50px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
+                    className="calc-pop inline-block text-[42px] sm:text-[48px] leading-none font-[family-name:var(--font-fredoka)] font-medium tracking-tight text-ink tabular-nums break-all"
                   >
                     {display}
                   </span>
@@ -1085,7 +1576,588 @@ function Index() {
           </div>
         )}
 
-        {/* VIEW 2: CURRENCY CONVERTER */}
+        {/* VIEW 2: FINANCIAL CALCULATOR (Juros Compostos, Parcelas, Descontos) */}
+        {activeTab === "finance" && (
+          <div className="calc-fade-up w-full max-w-[460px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-5 sm:p-6 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="size-8 rounded-xl bg-rose/15 text-rose-deep grid place-items-center">
+                <TrendingUp className="size-4" />
+              </div>
+              <div>
+                <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink">
+                  Calculadora Financeira
+                </h2>
+                <p className="text-[11px] text-ink-soft">Simulações de investimentos e custos</p>
+              </div>
+            </div>
+
+            {/* Financial Sub-Tabs */}
+            <div className="flex p-1 rounded-xl bg-display ring-1 ring-ink/5 gap-1 mb-5">
+              <button
+                onClick={() => setFinanceTab("compound")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  financeTab === "compound"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Juros Compostos
+              </button>
+              <button
+                onClick={() => setFinanceTab("loan")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  financeTab === "loan"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Parcelas / Juros
+              </button>
+              <button
+                onClick={() => setFinanceTab("discount")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  financeTab === "discount"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Desconto & Conta
+              </button>
+            </div>
+
+            {/* SUB-VIEW 1: JUROS COMPOSTOS */}
+            {financeTab === "compound" && (
+              <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Capital Inicial (R$)
+                    </label>
+                    <input
+                      type="number"
+                      value={initialCapital}
+                      onChange={(e) => setInitialCapital(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="1000"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Aporte Mensal (R$)
+                    </label>
+                    <input
+                      type="number"
+                      value={monthlyContribution}
+                      onChange={(e) => setMonthlyContribution(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="200"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Taxa de Juros (% ao ano)
+                    </label>
+                    <input
+                      type="number"
+                      value={interestRate}
+                      onChange={(e) => setInterestRate(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="10"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Período (Anos)
+                    </label>
+                    <input
+                      type="number"
+                      value={interestPeriodYears}
+                      onChange={(e) => setInterestPeriodYears(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="5"
+                    />
+                  </div>
+                </div>
+
+                {/* Compound Interest Results Card */}
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 shadow-inner mt-2">
+                  <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block text-center">
+                    Valor Total Acumulado
+                  </span>
+                  <div className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-fredoka)] text-ink text-center my-1 text-rose-deep">
+                    R$ {compoundRes.totalAmount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-ink/8 text-center text-xs">
+                    <div className="p-2 rounded-xl bg-sand/60">
+                      <span className="text-ink-soft text-[10px] block">Total Investido</span>
+                      <strong className="text-ink font-semibold text-sm">
+                        R$ {compoundRes.totalInvested.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded-xl bg-sand/60">
+                      <span className="text-ink-soft text-[10px] block">Total em Juros</span>
+                      <strong className="text-rose-deep font-semibold text-sm">
+                        + R$ {compoundRes.totalInterest.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SUB-VIEW 2: PARCELAS & FINANCIAMENTO */}
+            {financeTab === "loan" && (
+              <div className="space-y-3.5">
+                <div>
+                  <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                    Valor do Bem / Financiamento (R$)
+                  </label>
+                  <input
+                    type="number"
+                    value={loanAmount}
+                    onChange={(e) => setLoanAmount(e.target.value)}
+                    className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                    placeholder="5000"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Nº de Parcelas (Meses)
+                    </label>
+                    <input
+                      type="number"
+                      value={loanInstallments}
+                      onChange={(e) => setLoanInstallments(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="12"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Taxa Mensal (% ao mês)
+                    </label>
+                    <input
+                      type="number"
+                      value={loanMonthlyRate}
+                      onChange={(e) => setLoanMonthlyRate(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="2.5"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 shadow-inner mt-2">
+                  <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block text-center">
+                    Valor da Parcela Mensal
+                  </span>
+                  <div className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-fredoka)] text-rose-deep text-center my-1">
+                    R$ {loanRes.monthlyPayment.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-ink/8 text-center text-xs">
+                    <div className="p-2 rounded-xl bg-sand/60">
+                      <span className="text-ink-soft text-[10px] block">Total a Pagar</span>
+                      <strong className="text-ink font-semibold text-sm">
+                        R$ {loanRes.totalPaid.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </strong>
+                    </div>
+                    <div className="p-2 rounded-xl bg-sand/60">
+                      <span className="text-ink-soft text-[10px] block">Acréscimo de Juros</span>
+                      <strong className="text-ink font-semibold text-sm">
+                        R$ {loanRes.totalInterest.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SUB-VIEW 3: DESCONTO & DIVISÃO DE CONTA */}
+            {financeTab === "discount" && (
+              <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Valor Total (R$)
+                    </label>
+                    <input
+                      type="number"
+                      value={billAmount}
+                      onChange={(e) => setBillAmount(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="180"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Desconto (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={discountPercent}
+                      onChange={(e) => setDiscountPercent(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="10"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Gorjeta / Serviço (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={tipPercent}
+                      onChange={(e) => setTipPercent(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="10"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Dividir por (Pessoas)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={splitPeople}
+                      onChange={(e) => setSplitPeople(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="3"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 shadow-inner mt-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold text-ink-soft uppercase tracking-wider block">
+                        Valor por Pessoa
+                      </span>
+                      <div className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-fredoka)] text-rose-deep">
+                        R$ {discountRes.perPerson.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-semibold text-ink-soft uppercase tracking-wider block">
+                        Total Final da Conta
+                      </span>
+                      <div className="text-xl font-bold font-[family-name:var(--font-fredoka)] text-ink">
+                        R$ {discountRes.finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-ink/8 text-xs text-center">
+                    <div className="p-1.5 rounded-lg bg-sand/60">
+                      <span className="text-[10px] text-ink-soft">Economia (Desconto):</span>{" "}
+                      <strong>R$ {discountRes.discountValue.toFixed(2)}</strong>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-sand/60">
+                      <span className="text-[10px] text-ink-soft">Gorjeta:</span>{" "}
+                      <strong>R$ {discountRes.tipValue.toFixed(2)}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* VIEW 3: DATE & TIME CALCULATOR */}
+        {activeTab === "dates" && (
+          <div className="calc-fade-up w-full max-w-[460px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-5 sm:p-6 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="size-8 rounded-xl bg-rose/15 text-rose-deep grid place-items-center">
+                <Calendar className="size-4" />
+              </div>
+              <div>
+                <h2 className="font-[family-name:var(--font-fredoka)] font-semibold text-xl text-ink">
+                  Calculadora de Datas & Tempo
+                </h2>
+                <p className="text-[11px] text-ink-soft">Prazos, diferenças e horas trabalhadas</p>
+              </div>
+            </div>
+
+            {/* Date Sub-Tabs */}
+            <div className="flex p-1 rounded-xl bg-display ring-1 ring-ink/5 gap-1 mb-5">
+              <button
+                onClick={() => setDateTab("diff")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  dateTab === "diff"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Entre Datas
+              </button>
+              <button
+                onClick={() => setDateTab("add_sub")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  dateTab === "add_sub"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Somar/Subtrair
+              </button>
+              <button
+                onClick={() => setDateTab("work_hours")}
+                className={[
+                  "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold cursor-pointer transition-all text-center",
+                  dateTab === "work_hours"
+                    ? "bg-rose text-white shadow-xs"
+                    : "text-ink-soft hover:text-ink",
+                ].join(" ")}
+              >
+                Horas Trabalho
+              </button>
+            </div>
+
+            {/* SUB-VIEW 1: DIFFERENCE BETWEEN DATES */}
+            {dateTab === "diff" && (
+              <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Data Inicial
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-xs font-semibold text-ink outline-none cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Data Final
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-xs font-semibold text-ink outline-none cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {dateDiffRes && (
+                  <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 shadow-inner mt-2">
+                    <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block text-center">
+                      Diferença Total
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-fredoka)] text-rose-deep text-center my-1">
+                      {dateDiffRes.absDays} {dateDiffRes.absDays === 1 ? "dia" : "dias"}
+                    </div>
+                    <p className="text-xs text-center text-ink-soft">
+                      {dateDiffRes.isFuture ? "Até a data futura" : "Passaram-se desde a data inicial"}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-ink/8 text-center text-xs">
+                      <div className="p-2 rounded-xl bg-sand/60">
+                        <span className="text-[10px] text-ink-soft block">Dias Úteis</span>
+                        <strong className="text-ink font-semibold">{dateDiffRes.workdays}</strong>
+                      </div>
+                      <div className="p-2 rounded-xl bg-sand/60">
+                        <span className="text-[10px] text-ink-soft block">Fins de Semana</span>
+                        <strong className="text-ink font-semibold">{dateDiffRes.weekends}</strong>
+                      </div>
+                      <div className="p-2 rounded-xl bg-sand/60">
+                        <span className="text-[10px] text-ink-soft block">Semanas</span>
+                        <strong className="text-ink font-semibold">{dateDiffRes.weeks}</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SUB-VIEW 2: ADD OR SUBTRACT DAYS */}
+            {dateTab === "add_sub" && (
+              <div className="space-y-3.5">
+                <div>
+                  <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                    Data Base
+                  </label>
+                  <input
+                    type="date"
+                    value={baseDate}
+                    onChange={(e) => setBaseDate(e.target.value)}
+                    className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-xs font-semibold text-ink outline-none cursor-pointer"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 items-center">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Operação
+                    </label>
+                    <div className="flex rounded-xl bg-display ring-1 ring-ink/5 p-1 gap-1">
+                      <button
+                        onClick={() => setDeltaMode("add")}
+                        className={[
+                          "flex-1 py-1 rounded-lg text-xs font-semibold cursor-pointer",
+                          deltaMode === "add" ? "bg-rose text-white" : "text-ink-soft",
+                        ].join(" ")}
+                      >
+                        + Somar
+                      </button>
+                      <button
+                        onClick={() => setDeltaMode("sub")}
+                        className={[
+                          "flex-1 py-1 rounded-lg text-xs font-semibold cursor-pointer",
+                          deltaMode === "sub" ? "bg-rose text-white" : "text-ink-soft",
+                        ].join(" ")}
+                      >
+                        − Subtrair
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Quantidade de Dias
+                    </label>
+                    <input
+                      type="number"
+                      value={daysDelta}
+                      onChange={(e) => setDaysDelta(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-base font-semibold text-ink outline-none"
+                      placeholder="30"
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={skipWeekends}
+                    onChange={(e) => setSkipWeekends(e.target.checked)}
+                    className="rounded accent-rose size-4"
+                  />
+                  <span className="text-xs font-medium text-ink">Considerar apenas dias úteis (pular fins de semana)</span>
+                </label>
+
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 text-center shadow-inner mt-2">
+                  <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block">
+                    Data Resultante
+                  </span>
+                  <div className="text-lg sm:text-xl font-bold font-[family-name:var(--font-fredoka)] text-rose-deep capitalize mt-1">
+                    {calculateAddSubDays()}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SUB-VIEW 3: HORAS TRABALHADAS & BANCO DE HORAS */}
+            {dateTab === "work_hours" && (
+              <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Entrada
+                    </label>
+                    <input
+                      type="time"
+                      value={workEntry}
+                      onChange={(e) => setWorkEntry(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-sm font-semibold text-ink outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Saída Almoço
+                    </label>
+                    <input
+                      type="time"
+                      value={lunchOut}
+                      onChange={(e) => setLunchOut(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-sm font-semibold text-ink outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Retorno Almoço
+                    </label>
+                    <input
+                      type="time"
+                      value={lunchIn}
+                      onChange={(e) => setLunchIn(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-sm font-semibold text-ink outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                      Saída Final
+                    </label>
+                    <input
+                      type="time"
+                      value={workExit}
+                      onChange={(e) => setWorkExit(e.target.value)}
+                      className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-sm font-semibold text-ink outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block mb-1">
+                    Carga Contratada Diária (Horas)
+                  </label>
+                  <input
+                    type="number"
+                    value={contractHours}
+                    onChange={(e) => setContractHours(e.target.value)}
+                    className="w-full rounded-xl bg-display ring-1 ring-ink/5 p-2.5 text-sm font-semibold text-ink outline-none"
+                    placeholder="8"
+                  />
+                </div>
+
+                <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-4 shadow-inner mt-2 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-semibold text-ink-soft uppercase tracking-wider block">
+                      Total Trabalhado
+                    </span>
+                    <div className="text-2xl font-bold font-[family-name:var(--font-fredoka)] text-ink">
+                      {workHoursRes.totalHoursFormatted}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-semibold text-ink-soft uppercase tracking-wider block">
+                      Saldo / Horas Extras
+                    </span>
+                    <div
+                      className={[
+                        "text-2xl font-bold font-[family-name:var(--font-fredoka)]",
+                        workHoursRes.isOvertime ? "text-rose-deep" : "text-rose",
+                      ].join(" ")}
+                    >
+                      {workHoursRes.balanceFormatted}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* VIEW 4: CURRENCY CONVERTER */}
         {activeTab === "currency" && (
           <div className="calc-fade-up w-full max-w-[420px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-5 sm:p-6 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
             <div className="flex items-center gap-2 mb-4">
@@ -1097,7 +2169,6 @@ function Index() {
               </h2>
             </div>
 
-            {/* Input Value */}
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-ink-soft uppercase tracking-wider block mb-1.5">
@@ -1117,9 +2188,7 @@ function Index() {
                 </div>
               </div>
 
-              {/* Currency Selectors */}
               <div className="grid grid-cols-2 gap-3 items-center relative">
-                {/* From Currency */}
                 <div>
                   <label className="text-xs font-semibold text-ink-soft uppercase tracking-wider block mb-1.5">
                     De
@@ -1137,7 +2206,6 @@ function Index() {
                   </select>
                 </div>
 
-                {/* Swap Button */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-7 z-10">
                   <button
                     onClick={() => {
@@ -1152,7 +2220,6 @@ function Index() {
                   </button>
                 </div>
 
-                {/* To Currency */}
                 <div>
                   <label className="text-xs font-semibold text-ink-soft uppercase tracking-wider block mb-1.5">
                     Para
@@ -1171,7 +2238,6 @@ function Index() {
                 </div>
               </div>
 
-              {/* Converted Result Card */}
               <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-5 text-center shadow-inner mt-2">
                 <p className="text-xs font-medium text-ink-soft uppercase tracking-wider">
                   Resultado Convertido
@@ -1189,7 +2255,6 @@ function Index() {
                 </p>
               </div>
 
-              {/* Quick Preset Buttons */}
               <div className="flex gap-2 justify-center pt-1">
                 {["50", "100", "500", "1000"].map((preset) => (
                   <button
@@ -1205,7 +2270,7 @@ function Index() {
           </div>
         )}
 
-        {/* VIEW 3: UNIT CONVERTER */}
+        {/* VIEW 5: UNIT CONVERTER */}
         {activeTab === "units" && (
           <div className="calc-fade-up w-full max-w-[440px] rounded-[min(5vw,32px)] bg-sand ring-1 ring-ink/5 p-5 sm:p-6 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.07)]">
             <div className="flex items-center gap-2 mb-4">
@@ -1217,7 +2282,6 @@ function Index() {
               </h2>
             </div>
 
-            {/* Category Pills */}
             <div className="flex flex-wrap gap-1.5 mb-4">
               {(Object.keys(UNIT_DATA) as UnitCategory[]).map((catKey) => (
                 <button
@@ -1240,7 +2304,6 @@ function Index() {
               ))}
             </div>
 
-            {/* Inputs & Units Selection */}
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-ink-soft uppercase tracking-wider block mb-1.5">
@@ -1307,7 +2370,6 @@ function Index() {
                 </div>
               </div>
 
-              {/* Conversion Result Box */}
               <div className="rounded-2xl bg-display ring-1 ring-ink/5 p-5 text-center shadow-inner mt-2">
                 <p className="text-xs font-medium text-ink-soft uppercase tracking-wider">
                   Valor Convertido
@@ -1331,7 +2393,67 @@ function Index() {
         </p>
       </footer>
 
-      {/* HISTORY DRAWER / MODAL */}
+      {/* CONSTANTS MODAL */}
+      {showConstantsModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-ink/30 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setShowConstantsModal(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-sand p-6 ring-1 ring-ink/5 shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4 border-b border-ink/8 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-xl bg-rose/15 text-rose-deep grid place-items-center">
+                  <BookOpen className="size-4" />
+                </div>
+                <div>
+                  <h3 className="font-[family-name:var(--font-fredoka)] font-semibold text-lg text-ink">
+                    Constantes Científicas
+                  </h3>
+                  <p className="text-[11px] text-ink-soft">Clique para inserir diretamente no visor</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConstantsModal(false)}
+                className="size-8 rounded-full bg-display ring-1 ring-ink/5 flex items-center justify-center text-ink-soft hover:text-ink cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+              {SCIENTIFIC_CONSTANTS.map((c) => (
+                <button
+                  key={c.symbol}
+                  onClick={() => insertConstant(c)}
+                  className="w-full p-2.5 rounded-2xl bg-display ring-1 ring-ink/5 hover:ring-rose/40 hover:bg-sand/40 transition-all flex items-center justify-between text-left cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="size-8 rounded-xl bg-sand flex items-center justify-center font-bold text-rose-deep text-sm ring-1 ring-ink/5 group-hover:scale-105 transition-transform">
+                      {c.symbol}
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-ink leading-tight">{c.name}</p>
+                      <span className="text-[10px] text-ink-soft">{c.unit}</span>
+                    </div>
+                  </div>
+                  <span className="font-mono text-xs font-semibold text-ink-soft group-hover:text-rose-deep">
+                    {c.value > 10000 || (c.value < 0.001 && c.value > 0)
+                      ? c.value.toExponential(4)
+                      : c.value.toFixed(4)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HISTORY DRAWER WITH ADVANCED EXPORT & SHARE */}
       {showHistoryDrawer && (
         <div
           role="dialog"
@@ -1343,9 +2465,9 @@ function Index() {
             className="w-full max-w-sm h-full bg-sand p-5 sm:p-6 ring-1 ring-ink/10 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <div>
+            <div className="flex flex-col h-full overflow-hidden">
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-ink/10">
+              <div className="flex items-center justify-between pb-3 border-b border-ink/10 shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="size-8 rounded-xl bg-rose/15 text-rose-deep grid place-items-center">
                     <History className="size-4" />
@@ -1358,7 +2480,7 @@ function Index() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {calculationHistory.length > 0 && (
                     <button
                       onClick={clearCalculationHistory}
@@ -1377,10 +2499,50 @@ function Index() {
                 </div>
               </div>
 
+              {/* Export Toolbar */}
+              {calculationHistory.length > 0 && (
+                <div className="py-2.5 border-b border-ink/8 flex items-center justify-between gap-1.5 shrink-0">
+                  <span className="text-[10px] uppercase font-bold text-ink-soft tracking-wider">Exportar:</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={exportHistoryAsCSV}
+                      className="calc-key px-2 py-1 rounded-lg bg-display ring-1 ring-ink/5 text-[11px] font-semibold text-ink hover:text-rose-deep flex items-center gap-1 cursor-pointer"
+                      title="Baixar planilha CSV para Excel"
+                    >
+                      <FileSpreadsheet className="size-3 text-rose-deep" />
+                      <span>CSV</span>
+                    </button>
+                    <button
+                      onClick={exportHistoryAsTXT}
+                      className="calc-key px-2 py-1 rounded-lg bg-display ring-1 ring-ink/5 text-[11px] font-semibold text-ink hover:text-rose-deep flex items-center gap-1 cursor-pointer"
+                      title="Baixar arquivo TXT"
+                    >
+                      <FileText className="size-3 text-rose-deep" />
+                      <span>TXT</span>
+                    </button>
+                    <button
+                      onClick={copyForWhatsApp}
+                      className="calc-key px-2 py-1 rounded-lg bg-display ring-1 ring-ink/5 text-[11px] font-semibold text-ink hover:text-rose-deep flex items-center gap-1 cursor-pointer"
+                      title="Copiar lista formatada para WhatsApp"
+                    >
+                      <Share2 className="size-3 text-rose-deep" />
+                      <span>WhatsApp</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Toast Feedback */}
+              {shareFeedback && (
+                <div className="my-1 py-1.5 px-3 rounded-xl bg-rose/20 border border-rose text-rose-deep text-xs font-bold text-center animate-in fade-in shrink-0">
+                  {shareFeedback}
+                </div>
+              )}
+
               {/* History Items List */}
-              <div className="mt-4 space-y-2.5 overflow-y-auto max-h-[calc(100vh-160px)] pr-1 custom-scrollbar">
+              <div className="mt-3 space-y-2.5 overflow-y-auto flex-1 pr-1 custom-scrollbar">
                 {calculationHistory.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-16">
                     <History className="size-10 text-ink-soft/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-ink-soft">
                       Nenhum cálculo registrado ainda.
@@ -1417,7 +2579,7 @@ function Index() {
 
                       <button
                         onClick={() => copyToClipboard(item.result, item.id)}
-                        className="size-8 rounded-xl bg-sand/60 hover:bg-sand ring-1 ring-ink/5 flex items-center justify-center text-ink-soft hover:text-ink cursor-pointer transition-all"
+                        className="size-8 rounded-xl bg-sand/60 hover:bg-sand ring-1 ring-ink/5 flex items-center justify-center text-ink-soft hover:text-ink cursor-pointer transition-all shrink-0"
                         title="Copiar resultado"
                       >
                         {copiedId === item.id ? (
@@ -1435,7 +2597,7 @@ function Index() {
             {/* Close Button */}
             <button
               onClick={() => setShowHistoryDrawer(false)}
-              className="calc-key mt-4 w-full py-2.5 rounded-2xl bg-gradient-to-r from-rose to-rose-deep text-white font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm shadow-rose/20 hover:brightness-105"
+              className="calc-key mt-4 w-full py-2.5 rounded-2xl bg-gradient-to-r from-rose to-rose-deep text-white font-[family-name:var(--font-fredoka)] font-semibold text-center cursor-pointer shadow-sm shadow-rose/20 hover:brightness-105 shrink-0"
             >
               Fechar Histórico
             </button>

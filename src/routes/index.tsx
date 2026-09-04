@@ -1,7 +1,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Calculator, Keyboard, RotateCcw, Sparkles, X } from "lucide-react";
+import { Keyboard, RotateCcw, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -286,14 +286,8 @@ function Index() {
             </div>
           </div>
 
-          {/* Quick Actions & Status */}
+          {/* Quick Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Status indicator */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-display px-3 py-1.5 rounded-xl ring-1 ring-ink/5">
-              <span className="size-2 rounded-full bg-mint animate-pulse" />
-              <span className="text-xs font-medium text-ink-soft">Online</span>
-            </div>
-
             {/* Shortcuts button */}
             <button
               onClick={() => setShowShortcuts(true)}
